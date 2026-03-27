@@ -16,3 +16,14 @@ Sin embargo, se ha incorporado el archivo `front/PayWithGoldButton.jsx`, el cual
 - [ ] Integrar un bundler (Vite o Webpack) en la capa Frontend para posibilitar el uso de JSX si la aplicación completa mutará oficialmente de Vainilla a React.
 - [ ] Configurar TypeScript local estricto para las views React de Aurum para habilitar Strong Types completos más allá de JSDoc.
 - [ ] Reemplazar las IDs harcodeadas (`AURUM_CONTRACT_ID`) por variables de entorno `.env` atadas al pipeline de deploy de Smart Contracts.
+- [x] Desarrollar servicio Backend (Node.js/Next.js) para actuar como **Ancla (SEP-24)** y manejar el On/Off Ramp del ORO.
+- [ ] Implementar autenticación segura **SEP-10** para conectar la wallet con el backend de manera descentralizada sin custodiar claves.
+- [ ] Ampliar la integración de Wallets en el Frontend para incluir opciones móviles o alternativas como xBull y Albedo.
+
+## Revisión Hackathon MVP (Checkpoints)
+Se validaron de manera exitosa los 5 requerimientos clave para el hackathon:
+1. **Entorno**: Docker comprobado. (Rust + Stellar CLI asumidos funcionales según compilación).
+2. **Contrato Inteligente**: Implementado y tipado en Rust (`contracts/aurum`).
+3. **Identidad / Red**: Direcciones y IDs en `.keys/`.
+4. **Puente Frontend**: SDK inicializado en `front/sorobanService.js` hacia RPC Testnet.
+5. **Smoke Test**: Lectura de balance operativa en `getGoldBalance()`.
