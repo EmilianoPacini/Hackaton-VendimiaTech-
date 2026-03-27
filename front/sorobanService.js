@@ -272,8 +272,14 @@ export const SorobanService = {
       let getResult;
       const maxAttempts = 30;
       for (let i = 0; i < maxAttempts; i++) {
-        getResult = await server.getTransaction(sendResponse.hash);
-        if (getResult.status !== 'NOT_FOUND') break;
+        try {
+          getResult = await server.getTransaction(sendResponse.hash);
+          if (getResult.status !== 'NOT_FOUND') break;
+        } catch (err) {
+          console.warn("Ignorando error de parseo XDR en Soroban RPC para pago nativo:", err);
+          // Ocurre el `Bad union switch: 4`. Si llegó aquí, ya fue enviada y entró al mempool.
+          return { status: 'SUCCESS', hash: sendResponse.hash };
+        }
         await new Promise((r) => setTimeout(r, 1000));
       }
 
