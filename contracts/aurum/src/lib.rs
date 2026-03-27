@@ -62,6 +62,9 @@ const TOKEN_DECIMALS: i128 = 10_000_000; // 10^7
 const INSTANCE_LIFETIME_THRESHOLD: u32 = 17280; // ~1 day
 const INSTANCE_BUMP_AMOUNT: u32 = 518400; // ~30 days
 
+// Security Constants
+const MAX_PRICE_AGE_SECS: u64 = 86400; // 24 hours (Stale Price tolerance)
+
 // ============================================================================
 // Contract
 // ============================================================================
@@ -118,12 +121,19 @@ impl AurumContract {
         // 1. Fetch XAU -> USD price from Oracle
         let args_xau_usd = vec![env, xau_asset.into_val(env), usd_asset.clone().into_val(env), 0u64.into_val(env)];
         let xau_usd_opt: Option<PriceData> = env.invoke_contract(&oracle_addr, &Symbol::new(env, "cross_price"), args_xau_usd);
-        let xau_usd = xau_usd_opt.expect("XAU/USD price not found").price;
+        let xau_usd_data = xau_usd_opt.expect("XAU/USD price not found");
+        let now = env.ledger().timestamp();
+        assert!(now >= xau_usd_data.timestamp, "Oracle timestamp in future");
+        assert!(now - xau_usd_data.timestamp <= MAX_PRICE_AGE_SECS, "XAU/USD Oracle price is too old (STALE)");
+        let xau_usd = xau_usd_data.price;
 
         // 2. Fetch USD -> ARS price from Oracle
         let args_usd_ars = vec![env, usd_asset.into_val(env), ars_asset.into_val(env), 0u64.into_val(env)];
         let usd_ars_opt: Option<PriceData> = env.invoke_contract(&oracle_addr, &Symbol::new(env, "cross_price"), args_usd_ars);
-        let usd_ars = usd_ars_opt.expect("USD/ARS price not found").price;
+        let usd_ars_data = usd_ars_opt.expect("USD/ARS price not found");
+        assert!(now >= usd_ars_data.timestamp, "Oracle timestamp in future");
+        assert!(now - usd_ars_data.timestamp <= MAX_PRICE_AGE_SECS, "USD/ARS Oracle price is too old (STALE)");
+        let usd_ars = usd_ars_data.price;
 
         // 3. Compute XAU -> ARS cross rate.
         // Both returned values have 7 decimals. So 1 XAU = (xau_usd * usd_ars) / 10^7
@@ -169,6 +179,7 @@ impl AurumContract {
         sender: Address,
         destination: Address,
         amount_fiat: i128,
+        max_gold_to_spend: i128,
     ) -> i128 {
         // 1. Authorize sender
         sender.require_auth();
@@ -190,6 +201,7 @@ impl AurumContract {
             .expect("division by zero");
 
         assert!(gold_needed > 0, "gold amount rounds to zero");
+        assert!(gold_needed <= max_gold_to_spend, "Slippage tolerance exceeded: requested payment requires more GOLD than authorized");
 
         // 4. Get the GOLD token contract and execute transfer
         let gold_token: Address = env.storage().instance().get(&DataKey::GoldToken).unwrap();

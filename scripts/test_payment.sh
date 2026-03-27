@@ -86,6 +86,9 @@ echo -e "  💡 That's approximately $(echo "scale=7; $GOLD_PREVIEW / 10000000" 
 
 echo -e "\n${YELLOW}[4/5] 💳 Executing pay_with_rwa...${NC}"
 
+MAX_GOLD=$(echo "$GOLD_PREVIEW * 1.01 / 1" | bc)
+echo -e "  🛡️  Slippage max spend (+1%): ${CYAN}$MAX_GOLD${NC}"
+
 GOLD_USED=$(stellar contract invoke \
     --id "$AURUM_CONTRACT_ID" \
     --network testnet \
@@ -94,7 +97,8 @@ GOLD_USED=$(stellar contract invoke \
     pay_with_rwa \
     --sender "$USER1_ADDR" \
     --destination "$MERCHANT_ADDR" \
-    --amount_fiat $FIAT_AMOUNT 2>/dev/null | tr -d '"')
+    --amount_fiat $FIAT_AMOUNT \
+    --max_gold_to_spend "$MAX_GOLD" 2>/dev/null | tr -d '"')
 
 echo -e "  ✅ Payment executed!"
 echo -e "  🪙 GOLD transferred: ${MAGENTA}$GOLD_USED${NC} (raw)"

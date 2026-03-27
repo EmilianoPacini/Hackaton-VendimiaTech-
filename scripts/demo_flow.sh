@@ -148,6 +148,9 @@ for PAYMENT in "${PAYMENTS[@]}"; do
 
     echo -e "  💡 GOLD needed: ${MAGENTA}$GOLD_PREVIEW${NC} (~$(echo "scale=7; $GOLD_PREVIEW / 10000000" | bc) grams)"
 
+    MAX_GOLD=$(echo "$GOLD_PREVIEW * 1.01 / 1" | bc)
+    echo -e "  🛡️  Slippage max spend (+1%): ${CYAN}$MAX_GOLD${NC}"
+
     # Execute payment
     GOLD_USED=$(stellar contract invoke \
         --id "$AURUM_CONTRACT_ID" \
@@ -157,7 +160,8 @@ for PAYMENT in "${PAYMENTS[@]}"; do
         pay_with_rwa \
         --sender "$USER1_ADDR" \
         --destination "$MERCHANT_ADDR" \
-        --amount_fiat "$AMOUNT" 2>/dev/null | tr -d '"')
+        --amount_fiat "$AMOUNT" \
+        --max_gold_to_spend "$MAX_GOLD" 2>/dev/null | tr -d '"')
 
     echo -e "  ✅ Paid! GOLD transferred: ${GREEN}$GOLD_USED${NC}"
 
