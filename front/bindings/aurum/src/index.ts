@@ -34,7 +34,7 @@ if (typeof window !== "undefined") {
 export const networks = {
   testnet: {
     networkPassphrase: "Test SDF Network ; September 2015",
-    contractId: "CBW2T5Y3WPOSSIBYYTNAQODW57FYGPEMNPONUZDRX7G7XFKMDDENJCWS",
+    contractId: "CCJUJUBPQA3S3VJ6NWGF2FLYARSPIXWLGMVRHOZDBHSKXYBQMMZZEMZ5",
   }
 } as const
 
@@ -62,7 +62,7 @@ export interface Client {
    * Construct and simulate a pay_with_rwa transaction. Returns an `AssembledTransaction` object which will have a `result` field containing the result of the simulation. If this transaction changes contract state, you will need to call `signAndSend()` on the returned object.
    * Pay with RWA (GOLD). This is the star function.
    */
-  pay_with_rwa: ({sender, destination, amount_fiat}: {sender: string, destination: string, amount_fiat: i128}, options?: MethodOptions) => Promise<AssembledTransaction<i128>>
+  pay_with_rwa: ({sender, destination, amount_fiat, max_gold_to_spend}: {sender: string, destination: string, amount_fiat: i128, max_gold_to_spend: i128}, options?: MethodOptions) => Promise<AssembledTransaction<i128>>
 
   /**
    * Construct and simulate a get_gold_token transaction. Returns an `AssembledTransaction` object which will have a `result` field containing the result of the simulation. If this transaction changes contract state, you will need to call `signAndSend()` on the returned object.

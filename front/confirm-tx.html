@@ -152,20 +152,33 @@
 
     // Leer parámetros de la URL
     const params = new URLSearchParams(window.location.search);
-    const dest = params.get('dest') || '';
-    const amount = params.get('amount') || '2450';
-    const name = params.get('name') || 'Comercio';
+    const dest = params.get('dest') || sessionStorage.getItem('aurum_tx_dest') || '';
+    const amount = params.get('amount') || sessionStorage.getItem('aurum_tx_amount') || '2450';
+    const maxGoldFromUrl = params.get('max_gold') || sessionStorage.getItem('aurum_tx_max_gold') || '';
+    const name = params.get('name') || sessionStorage.getItem('aurum_tx_name') || 'Comercio';
 
     // Poblar la tarjeta de confirmación con datos reales
     const nameEl = document.querySelector('.tx-recipient-name');
     const addrEl = document.querySelector('.tx-recipient-address');
     const amountEl = document.querySelector('.tx-amount h2');
+    const goldEl = document.querySelector('.tx-amount p');
     const totalEl = document.querySelectorAll('.tx-detail-value')[1]; // "Total Gasto"
 
     if (nameEl) nameEl.textContent = name;
     if (addrEl) addrEl.textContent = dest ? (dest.slice(0, 6) + '...' + dest.slice(-4)) : '—';
     if (amountEl) amountEl.textContent = `- ${Number(amount).toLocaleString('es-AR')} ARS`;
     if (totalEl) totalEl.textContent = `${Number(amount).toLocaleString('es-AR')} ARS`;
+    if (goldEl && maxGoldFromUrl) {
+       goldEl.textContent = `${(Number(maxGoldFromUrl) / 10000000).toFixed(7)} tGLD`;
+    }
+
+    function to7DecimalsBigInt(value) {
+      const normalized = String(value).trim().replace(',', '.');
+      if (!/^\d+(\.\d+)?$/.test(normalized)) return null;
+      const [intPart, decPartRaw = ''] = normalized.split('.');
+      const decPart = decPartRaw.slice(0, 7).padEnd(7, '0');
+      return BigInt(intPart + decPart);
+    }
 
     // Swipe to Pay logic
     const btn = document.getElementById('swipe-btn');
@@ -221,7 +234,7 @@
     document.addEventListener('mouseup', stopDrag);
     document.addEventListener('touchend', stopDrag);
     
-    async function completePayment() {
+    async function handleGoldPayment() {
       if (paymentInProgress) return;
       paymentInProgress = true;
       isDragging = false;
@@ -234,14 +247,20 @@
         text.textContent = 'Calculando GOLD...';
 
         // 2. Convertir monto ARS a 7 decimales para el contrato
-        const amountFiat7Dec = BigInt(amount) * BigInt(10_000_000);
+        const amountFiat7Dec = to7DecimalsBigInt(amount);
+        if (!amountFiat7Dec || amountFiat7Dec <= 0n) {
+          throw new Error('Monto ARS invalido');
+        }
 
-        // 3. Obtener preview de cuánto GOLD se necesita
-        const preview = await SorobanService.getPaymentPreview(amountFiat7Dec.toString());
+        // 3. Obtener preview de cuánto GOLD se necesita (Solo si no lo tenemos en memoria para no hacer crash de redondeo Wasm)
+        let maxGold;
+        if (maxGoldFromUrl) {
+           maxGold = BigInt(maxGoldFromUrl);
+        } else {
+           const preview = await SorobanService.getPaymentPreview(amountFiat7Dec.toString());
+           maxGold = BigInt(Math.ceil(Number(preview.raw) * 1.01));
+        }
         text.textContent = 'Firmando con Freighter...';
-
-        // 4. Calcular slippage (+1%)
-        const maxGold = BigInt(Math.ceil(Number(preview.raw) * 1.01));
 
         // 5. Ejecutar pago real on-chain
         const result = await SorobanService.executePayment(
@@ -264,6 +283,8 @@
           errorMsg = 'Saldo de Oro insuficiente.';
         } else if (err.message.includes('SIGNATURE_REJECTED')) {
           errorMsg = 'Rechazaste la firma.';
+        } else if (err.message.includes('STALE_PRICE')) {
+          errorMsg = 'Precio del oráculo desactualizado. Reintentá en unos segundos.';
         } else if (err.message.includes('NETWORK_TIMEOUT') || err.message.includes('NETWORK_ERROR')) {
           errorMsg = 'Error de comunicación Testnet.';
         } else {
@@ -291,6 +312,10 @@
           text.textContent = 'Desliza para pagar';
         }, 3000);
       }
+    }
+
+    async function completePayment() {
+      await handleGoldPayment();
     }
   </script>
 

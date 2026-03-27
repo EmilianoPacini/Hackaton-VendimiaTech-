@@ -6,7 +6,7 @@ const SOROBAN_RPC_URL = 'https://soroban-testnet.stellar.org';
 const NETWORK_PASSPHRASE = 'Test SDF Network ; September 2015';
 
 // Dirección del contrato AURUM RWA en Testnet
-const AURUM_CONTRACT_ID = 'CBW2T5Y3WPOSSIBYYTNAQODW57FYGPEMNPONUZDRX7G7XFKMDDENJCWS';
+const AURUM_CONTRACT_ID = 'CCJUJUBPQA3S3VJ6NWGF2FLYARSPIXWLGMVRHOZDBHSKXYBQMMZZEMZ5';
 
 /**
  * Componente React "Botón de Pagar con Oro".
@@ -28,7 +28,7 @@ export const PayWithGoldButton = ({ montoEnPesos, direccionDestino }) => {
    * Ejecuta el flujo principal de pago On-Chain usando Soroban.
    * Maneja errores de timeout, balance vacante, y firma rechazada.
    */
-  const handlePayment = async () => {
+  const handleGoldPayment = async () => {
     setIsLoading(true);
     setErrorStatus(null);
     setTxHash(null);
@@ -85,6 +85,9 @@ export const PayWithGoldButton = ({ montoEnPesos, direccionDestino }) => {
       const simResult = await server.simulateTransaction(tx);
       
       if (StellarSdk.rpc.Api.isSimulationError(simResult)) {
+        if (simResult.error.toLowerCase().includes('stale')) {
+          throw new Error('Precio del oráculo desactualizado (Stale Price). Reintentá en unos segundos.');
+        }
         // Manejo explícito de balance en el error devuelto por `simulation`
         if (simResult.error.toLowerCase().includes('balance') || simResult.error.includes('Insufficient funds')) {
           throw new Error('Balance insuficiente: No posees suficiente oro (tGLD) o XLM para fees.');
@@ -140,6 +143,8 @@ export const PayWithGoldButton = ({ montoEnPesos, direccionDestino }) => {
       if (err instanceof Error) {
         if (err.message.includes('timeout') || err.message.includes('fetch')) {
           errorMessage = 'Timeout: La red Stellar no respondió a tiempo. Revisa tu conexión de red.';
+        } else if (err.message.includes('Stale Price') || err.message.includes('stale')) {
+          errorMessage = 'Precio del oráculo desactualizado. Reintentá en unos segundos.';
         } else {
           errorMessage = err.message;
         }
@@ -154,7 +159,7 @@ export const PayWithGoldButton = ({ montoEnPesos, direccionDestino }) => {
     <div style={{ margin: '20px 0', fontFamily: 'sans-serif' }}>
       <button
         type="button"
-        onClick={handlePayment}
+        onClick={handleGoldPayment}
         disabled={isLoading || !montoEnPesos || !direccionDestino}
         style={{
           background: 'linear-gradient(135deg, #eab308, #ca8a04)',
