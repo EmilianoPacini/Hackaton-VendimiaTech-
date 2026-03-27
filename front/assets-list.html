@@ -52,7 +52,7 @@
       </div>
 
       <div class="assets-list">
-        <a href="confirm-tx.html" class="asset-item">
+        <a href="send-tgld.html" class="asset-item" id="send-tgld-link">
           <div class="asset-left">
             <div class="asset-icon" style="background: linear-gradient(135deg, #eab308, #ca8a04);">
               <svg viewBox="0 0 24 24" width="20" height="20" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
@@ -74,7 +74,7 @@
           </div>
         </a>
 
-        <a href="confirm-tx.html" class="asset-item">
+        <a href="javascript:void(0)" class="asset-item" style="opacity:.65; cursor:not-allowed;">
           <div class="asset-left">
             <div class="asset-icon" style="background: linear-gradient(135deg, #26a17b, #1f8b6b);">₮</div>
             <div class="asset-info">
@@ -88,7 +88,7 @@
           </div>
         </a>
         
-        <a href="confirm-tx.html" class="asset-item">
+        <a href="javascript:void(0)" class="asset-item" style="opacity:.65; cursor:not-allowed;">
           <div class="asset-left">
             <div class="asset-icon" style="background: linear-gradient(135deg, #3b82f6, #2563eb);">🇦🇷</div>
             <div class="asset-info">
@@ -103,7 +103,30 @@
         </a>
       </div>
 
+      <p id="freighter-status" style="margin-top:12px;font-size:12px;color:var(--color-text-secondary);"></p>
     </div>
   </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/stellar-sdk/12.3.0/stellar-sdk.min.js"></script>
+
+  <script type="module">
+    import { SorobanService } from './sorobanService.js';
+
+    const tgldLink = document.getElementById('send-tgld-link');
+    const statusEl = document.getElementById('freighter-status');
+
+    tgldLink.addEventListener('click', async (e) => {
+      e.preventDefault();
+      if (statusEl) statusEl.textContent = 'Conectando Freighter...';
+
+      try {
+        await SorobanService.connectWallet();
+        if (statusEl) statusEl.textContent = 'Freighter conectada. Abriendo envio tGLD...';
+        window.location.href = 'send-tgld.html';
+      } catch (err) {
+        if (statusEl) statusEl.textContent = 'No se pudo conectar Freighter. Verifica la extension.';
+      }
+    });
+  </script>
 </body>
 </html>

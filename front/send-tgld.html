@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aurum Wallet — Enviar tGLD</title>
+  <meta name="description" content="Send tGLD with Freighter" />
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .form-card {
+      background: var(--color-card-solid);
+      border: 1.5px solid var(--color-card-glass-border);
+      border-radius: var(--radius-md);
+      padding: 18px;
+      margin-top: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .field-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--color-text-secondary);
+      margin-bottom: 6px;
+    }
+    .field-input {
+      width: 100%;
+      border: 1px solid var(--color-card-glass-border);
+      border-radius: 12px;
+      background: #fff;
+      color: var(--color-text-primary);
+      padding: 12px;
+      font-size: 14px;
+      outline: none;
+    }
+    .field-input:focus {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.12);
+    }
+    .helper {
+      font-size: 12px;
+      color: var(--color-text-muted);
+    }
+    .estimate {
+      font-size: 13px;
+      color: var(--color-text-secondary);
+      background: rgba(59, 130, 246, 0.08);
+      border-radius: 10px;
+      padding: 10px;
+    }
+    .primary-btn {
+      margin-top: 10px;
+      width: 100%;
+      border: none;
+      border-radius: 24px;
+      padding: 14px;
+      color: #fff;
+      background: linear-gradient(135deg, #eab308, #ca8a04);
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .primary-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    .inline-status {
+      margin-top: 8px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .inline-status.error { color: #ef4444; }
+    .inline-status.ok { color: #16a34a; }
+  </style>
+</head>
+<body class="page-transition">
+  <div class="screen">
+    <div class="ambient-blob blob-1"></div>
+    <div class="ambient-blob blob-2" style="background:#fef08a;"></div>
+    <div class="screen-content">
+      <div class="social-header" style="margin-top:10px;">
+        <a class="back-btn" href="assets-list.html">
+          <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+        </a>
+        <h1>Enviar tGLD</h1>
+      </div>
+
+      <div class="form-card">
+        <div>
+          <div class="field-label">Destino (Stellar Address)</div>
+          <input id="dest-input" class="field-input" placeholder="G..." />
+          <div class="helper">Direccion publica del receptor (testnet).</div>
+        </div>
+
+        <div>
+          <div class="field-label">Cantidad tGLD</div>
+          <input id="amount-input" class="field-input" type="number" step="0.0000001" min="0" placeholder="0.0100000" />
+          <div class="helper">7 decimales maximos.</div>
+        </div>
+
+        <div class="estimate" id="estimate-box">Conecta Freighter para calcular equivalente en ARS.</div>
+
+        <button id="continue-btn" class="primary-btn" disabled>Continuar a firma</button>
+        <div id="status-msg" class="inline-status"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stellar SDK (CDN) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/stellar-sdk/12.3.0/stellar-sdk.min.js"></script>
+
+  <script type="module">
+    import { SorobanService } from './sorobanService.js';
+
+    const destInput = document.getElementById('dest-input');
+    const amountInput = document.getElementById('amount-input');
+    const estimateBox = document.getElementById('estimate-box');
+    const continueBtn = document.getElementById('continue-btn');
+    const statusMsg = document.getElementById('status-msg');
+
+    let pricePerGramARS = 0;
+
+    function setStatus(msg, isError = false) {
+      statusMsg.textContent = msg;
+      statusMsg.className = `inline-status ${isError ? 'error' : 'ok'}`;
+    }
+
+    function validateAddress(address) {
+      return typeof address === 'string' && address.startsWith('G') && address.length === 56;
+    }
+
+    function to7DecimalsBigInt(value) {
+      const normalized = String(value).trim().replace(',', '.');
+      if (!/^\d+(\.\d+)?$/.test(normalized)) return null;
+      const [intPart, decPartRaw = ''] = normalized.split('.');
+      const decPart = decPartRaw.slice(0, 7).padEnd(7, '0');
+      return BigInt(intPart + decPart);
+    }
+
+    function from7Decimals(raw) {
+      return Number(raw) / 10_000_000;
+    }
+
+    function refreshEstimate() {
+      const rawGold = to7DecimalsBigInt(amountInput.value);
+      if (!rawGold || rawGold <= 0n || pricePerGramARS <= 0) {
+        continueBtn.disabled = true;
+        return;
+      }
+      const goldFloat = from7Decimals(rawGold);
+      const ars = goldFloat * pricePerGramARS;
+      estimateBox.textContent = `Estimado segun oraculo: ${ars.toLocaleString('es-AR', { maximumFractionDigits: 2 })} ARS`;
+      continueBtn.disabled = !validateAddress(destInput.value.trim());
+    }
+
+    async function init() {
+      try {
+        setStatus('Conectando Freighter...');
+        await SorobanService.connectWallet();
+        const { pricePerGramARS: price } = await SorobanService.getGoldPriceARS();
+        pricePerGramARS = price;
+        if (pricePerGramARS > 0) {
+          setStatus('Wallet conectada. Precio oraculo cargado.');
+          estimateBox.textContent = `Precio actual: 1 tGLD ~= ${pricePerGramARS.toLocaleString('es-AR', { maximumFractionDigits: 2 })} ARS`;
+        } else {
+          setStatus('No se pudo leer el oraculo. Igual podes intentar.', true);
+        }
+        refreshEstimate();
+      } catch (err) {
+        setStatus('No se pudo conectar Freighter.', true);
+      }
+    }
+
+    continueBtn.addEventListener('click', () => {
+      const destination = destInput.value.trim();
+      if (!validateAddress(destination)) {
+        setStatus('Direccion destino invalida.', true);
+        return;
+      }
+
+      const rawGold = to7DecimalsBigInt(amountInput.value);
+      if (!rawGold || rawGold <= 0n) {
+        setStatus('Cantidad tGLD invalida.', true);
+        return;
+      }
+
+      if (pricePerGramARS <= 0) {
+        setStatus('No hay precio de oraculo disponible.', true);
+        return;
+      }
+
+      const goldFloat = from7Decimals(rawGold);
+      const arsFloat = goldFloat * pricePerGramARS;
+      const arsForUrl = String(Math.max(0.0000001, arsFloat));
+      const name = 'Transferencia tGLD';
+      
+      // Guardar en sessionStorage para evitar perdida de query strings por redireccion del server (clean URLs)
+      sessionStorage.setItem('aurum_tx_dest', destination);
+      sessionStorage.setItem('aurum_tx_amount', arsForUrl);
+      sessionStorage.setItem('aurum_tx_name', name);
+      sessionStorage.setItem('aurum_tx_max_gold', rawGold.toString());
+
+      const nextUrl = `confirm-tx.html?v=${Date.now()}&dest=${encodeURIComponent(destination)}&amount=${encodeURIComponent(arsForUrl)}&name=${encodeURIComponent(name)}&max_gold=${rawGold.toString()}`;
+      window.location.href = nextUrl;
+    });
+
+    destInput.addEventListener('input', refreshEstimate);
+    amountInput.addEventListener('input', refreshEstimate);
+    init();
+  </script>
+</body>
+</html>

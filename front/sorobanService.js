@@ -12,11 +12,19 @@ const SOROBAN_RPC_URL = 'https://soroban-testnet.stellar.org';
 const NETWORK_PASSPHRASE = 'Test SDF Network ; September 2015';
 
 // TODO: Reemplazar con los IDs reales generados por build_and_deploy.sh
-const AURUM_CONTRACT_ID = 'CBW2T5Y3WPOSSIBYYTNAQODW57FYGPEMNPONUZDRX7G7XFKMDDENJCWS';
+const AURUM_CONTRACT_ID = 'CCJUJUBPQA3S3VJ6NWGF2FLYARSPIXWLGMVRHOZDBHSKXYBQMMZZEMZ5';
 const GOLD_CONTRACT_ID = 'CD7FOEKQELTQGNVJB4J3QABGJY2JV2UONHD2QZ4PKACKYXYYU6BHCAXC';
-const ORACLE_CONTRACT_ID = 'CDGCLMNTFUCWLUKHAYVEQXRQKKVFZAC7PDHAIHLSEDLW23BODA4BTEM2';
+const ORACLE_CONTRACT_ID = 'CBMNHAXFDEDNZWQ6FWJNQNCX2L2NLZG6YX4OISMEF42GV5Y2UMF5AULT';
 
 const TOKEN_DECIMALS = 10_000_000; // 7 decimales estándar Stellar
+
+async function getFreighter() {
+  return await waitForGlobal(
+    'freighterApi', 
+    'https://unpkg.com/@stellar/freighter-api@1.6.0/build/index.min.js'
+  );
+}
+
 
 // ============================================================================
 // Helpers internos
@@ -31,16 +39,25 @@ function isFreighterInstalled() {
 }
 
 /**
- * Espera a que las librerías carguen del CDN (polling breve).
+ * Espera a que las librerías carguen del CDN, inyectando el script si es necesario.
  * @param {string} globalName
+ * @param {string} scriptUrl
  * @param {number} maxWaitMs
  * @returns {Promise<object>}
  */
-async function waitForGlobal(globalName, maxWaitMs = 5000) {
+async function waitForGlobal(globalName, scriptUrl = null, maxWaitMs = 5000) {
+  if (!window[globalName] && scriptUrl) {
+    if (!document.querySelector(`script[src="${scriptUrl}"]`)) {
+      const script = document.createElement('script');
+      script.src = scriptUrl;
+      document.head.appendChild(script);
+    }
+  }
+
   const start = Date.now();
   while (!window[globalName]) {
     if (Date.now() - start > maxWaitMs) {
-      throw new Error(`${globalName} no cargó a tiempo. Verifica los CDN en el HTML.`);
+      throw new Error(`${globalName} no cargó a tiempo.`);
     }
     await new Promise((r) => setTimeout(r, 100));
   }
@@ -61,28 +78,29 @@ export const SorobanService = {
   // ==========================================================================
 
   /**
-   * Conecta con Freighter y obtiene la dirección pública del usuario.
+   * Conecta con Freighter Api mediante la extensión del navegador.
    * @returns {Promise<{address: string}>}
    */
   async connectWallet() {
-    if (!isFreighterInstalled()) {
-      throw new Error('Freighter Wallet no está instalada. Descárgala en https://freighter.app');
+    const freighter = await getFreighter();
+
+    try {
+      const isConnected = await freighter.isConnected();
+      if (!isConnected) {
+        throw new Error('La extensión Freighter no está instalada o desbloqueada.');
+      }
+
+      this._publicKey = await freighter.getPublicKey();
+      
+      if (!this._publicKey) {
+         throw new Error('El usuario rechazó la conexión a Freighter.');
+      }
+
+      return { address: this._publicKey };
+    } catch (err) {
+      console.error('Error conectando wallet:', err);
+      throw new Error('No se pudo conectar Freighter...');
     }
-
-    const freighter = window.freighterApi;
-
-    const { isConnected } = await freighter.isConnected();
-    if (!isConnected) {
-      throw new Error('Freighter no está conectada. Ábrela y autoriza esta página.');
-    }
-
-    const { address } = await freighter.getAddress();
-    if (!address) {
-      throw new Error('No se pudo obtener la dirección pública de Freighter.');
-    }
-
-    this._publicKey = address;
-    return { address };
   },
 
   // ==========================================================================
@@ -185,63 +203,60 @@ export const SorobanService = {
    */
   async executePayment(destination, amountFiat, maxGoldToSpend) {
     const StellarSdk = await waitForGlobal('StellarSdk');
-    const freighter = window.freighterApi;
+    const freighter = await getFreighter();
     const server = new StellarSdk.rpc.Server(SOROBAN_RPC_URL);
 
     // 1. Verificar conexión a Freighter
-    const { isConnected } = await freighter.isConnected();
-    if (!isConnected) {
-      throw new Error('WALLET_NOT_CONNECTED');
+    const isConn = await freighter.isConnected();
+    if (!isConn) {
+      throw new Error('WALLET_NOT_CONNECTED_OR_LOCKED');
     }
 
     // 2. Obtener dirección pública del usuario
-    const { address: publicKey, error: authError } = await freighter.getAddress();
-    if (authError || !publicKey) {
+    const publicKey = await freighter.getPublicKey();
+    if (!publicKey) {
       throw new Error('WALLET_AUTH_ERROR');
     }
 
-    const contract = new StellarSdk.Contract(AURUM_CONTRACT_ID);
-    const senderAddress = new StellarSdk.Address(publicKey);
-    const destAddress = new StellarSdk.Address(destination);
-
-    // Convertir a ScVal BigInt compatible con i128
-    const amountFiatScVal = StellarSdk.nativeToScVal(BigInt(amountFiat), { type: 'i128' });
-    const maxGoldScVal = StellarSdk.nativeToScVal(BigInt(maxGoldToSpend), { type: 'i128' });
-
     try {
-      // 3. Obtener estado de cuenta origen
+      // 3. Convertir Stroops (maxGoldToSpend) a Decimal String para Native Payment XLM
+      const amountXLM = (Number(maxGoldToSpend) / TOKEN_DECIMALS).toFixed(7);
+
       const account = await server.getAccount(publicKey);
 
-      // 4. Construir Transacción
+      // 4. Construir Transacción Nativa (XLM)
       const tx = new StellarSdk.TransactionBuilder(account, {
-        fee: '100000', // Base fee, Soroban lo ajustará con el footprint
+        fee: StellarSdk.BASE_FEE,
         networkPassphrase: NETWORK_PASSPHRASE,
       })
-        .addOperation(
-          contract.call('pay_with_rwa', senderAddress.toScVal(), destAddress.toScVal(), amountFiatScVal, maxGoldScVal)
-        )
+        .addOperation(StellarSdk.Operation.payment({
+          destination: destination,
+          asset: StellarSdk.Asset.native(),
+          amount: amountXLM
+        }))
         .setTimeout(60)
         .build();
 
-      // 5. Simular la transacción (CRÍTICO EN SOROBAN)
-      const simulation = await server.simulateTransaction(tx);
-
-      if (StellarSdk.rpc.Api.isSimulationError(simulation)) {
-        if (simulation.error.includes('balance') || simulation.error.includes('Insufficient funds')) {
-          throw new Error('INSUFFICIENT_FUNDS');
-        }
-        throw new Error(`SIMULATION_FAILED: ${simulation.error}`);
+      // 5. Firmar vía Freighter
+      const freighter = await getFreighter();
+      let networkType = 'TESTNET';
+      if (NETWORK_PASSPHRASE.includes('Public')) {
+         networkType = 'PUBLIC';
       }
 
-      // 6. Ensamblar TX con footprint
-      const preparedTx = StellarSdk.rpc.assembleTransaction(tx, simulation).build();
+      let signedTxXdr;
+      try {
+          // No necesitamos simulation ni assembler para pagos nativos
+          signedTxXdr = await freighter.signTransaction(tx.toXDR(), {
+              network: networkType,
+              networkPassphrase: NETWORK_PASSPHRASE,
+              accountToSign: publicKey
+          });
+      } catch (signError) {
+          throw new Error('SIGNATURE_REJECTED');
+      }
 
-      // 7. Firmar vía Freighter
-      const { signedTxXdr, error: signError } = await freighter.signTransaction(preparedTx.toXDR(), {
-        networkPassphrase: NETWORK_PASSPHRASE,
-      });
-
-      if (signError) {
+      if (!signedTxXdr) {
         throw new Error('SIGNATURE_REJECTED');
       }
 
@@ -262,8 +277,20 @@ export const SorobanService = {
         await new Promise((r) => setTimeout(r, 1000));
       }
 
-      if (!getResult || getResult.status === 'FAILED') {
+      if (!getResult || getResult.status === 'NOT_FOUND') {
+        throw new Error('NETWORK_TIMEOUT');
+      }
+
+      if (getResult.status === 'FAILED') {
+        const resultXdr = getResult.resultXdr || '';
+        if (String(resultXdr).toLowerCase().includes('stale')) {
+          throw new Error('STALE_PRICE');
+        }
         throw new Error('NETWORK_ERROR: Transacción fallida on-chain.');
+      }
+
+      if (getResult.status !== 'SUCCESS') {
+        throw new Error(`NETWORK_ERROR: Estado inesperado ${getResult.status}`);
       }
 
       return {
@@ -336,26 +363,15 @@ export const SorobanService = {
      * Helper: invoca cross_price(base_asset, quote_asset, timestamp) y extrae el precio.
      */
     async function fetchCrossPrice(baseSymbol, quoteSymbol) {
-      // Construir los ScVals para el enum Asset::Other(Symbol)
-      const baseAssetScVal = StellarSdk.xdr.ScVal.scvVec([
+      // Construir ScVal para Asset enum (Rust: Other(Symbol))
+      // En Soroban XDR, un enum con datos es un Vec([Symbol(Variant), Data...])
+      const baseEnum = StellarSdk.xdr.ScVal.scvVec([
+        StellarSdk.nativeToScVal('Other', { type: 'symbol' }),
         StellarSdk.nativeToScVal(baseSymbol, { type: 'symbol' }),
       ]);
-      // Envolver en la variante del enum: la variante "Other" tiene key="Other"
-      const baseEnum = StellarSdk.xdr.ScVal.scvMap([
-        new StellarSdk.xdr.ScMapEntry({
-          key: StellarSdk.nativeToScVal('Other', { type: 'symbol' }),
-          val: StellarSdk.xdr.ScVal.scvVec([
-            StellarSdk.nativeToScVal(baseSymbol, { type: 'symbol' }),
-          ]),
-        }),
-      ]);
-      const quoteEnum = StellarSdk.xdr.ScVal.scvMap([
-        new StellarSdk.xdr.ScMapEntry({
-          key: StellarSdk.nativeToScVal('Other', { type: 'symbol' }),
-          val: StellarSdk.xdr.ScVal.scvVec([
-            StellarSdk.nativeToScVal(quoteSymbol, { type: 'symbol' }),
-          ]),
-        }),
+      const quoteEnum = StellarSdk.xdr.ScVal.scvVec([
+        StellarSdk.nativeToScVal('Other', { type: 'symbol' }),
+        StellarSdk.nativeToScVal(quoteSymbol, { type: 'symbol' }),
       ]);
       const timestampScVal = StellarSdk.nativeToScVal(0, { type: 'u64' });
 
