@@ -156,61 +156,69 @@ update_oracle() {
     fi
     echo -e "  💱 USD/ARS: ${BOLD}\$${usd_ars}${NC} (source: ${rate_source})"
 
-    # 3. Calculate gold price in ARS per gram
-    # 1 troy ounce = 31.1035 grams
-    # Price per gram ARS = (XAU_USD / 31.1035) * USD_ARS
-    echo -e "  ${CYAN}[3/4]${NC} Calculating GOLD price in ARS per gram..."
-    local gold_ars_per_gram
-    gold_ars_per_gram=$(echo "scale=2; ($gold_usd / 31.1035) * $usd_ars" | bc)
-    echo -e "  🥇 1 gram GOLD = ${BOLD}${MAGENTA}$gold_ars_per_gram ARS${NC}"
+    # 3. Calculate Soroban prices (7 decimals)
+    echo -e "  ${CYAN}[3/4]${NC} Formatting prices for Soroban..."
+    local xau_usd_soroban
+    xau_usd_soroban=$(echo "scale=0; $gold_usd * 10000000 / 1" | bc)
+    
+    local usd_ars_soroban
+    usd_ars_soroban=$(echo "scale=0; $usd_ars * 10000000 / 1" | bc)
 
-    # Convert to Soroban format (7 decimals, integer)
-    # gold_ars_per_gram = 85432.10 → 85432_1000000 (soroban format)
-    local soroban_price
-    soroban_price=$(echo "scale=0; ($gold_usd / 31.1035) * $usd_ars * 10000000 / 1" | bc)
-    echo -e "  📦 Soroban format: ${CYAN}${soroban_price}${NC} (7 decimals)"
+    echo -e "  📦 XAU/USD (Soroban): ${CYAN}${xau_usd_soroban}${NC}"
+    echo -e "  📦 USD/ARS (Soroban): ${CYAN}${usd_ars_soroban}${NC}"
 
     # 4. Update on-chain (or dry-run)
     if [ "$DRY_RUN" = true ]; then
         echo ""
         echo -e "  ${YELLOW}🔸 DRY RUN - No on-chain update performed${NC}"
-        echo -e "  Would call: set_oracle_price($soroban_price, \"$ORACLE_SOURCE\")"
+        echo -e "  Would call set_price XAU/USD: $xau_usd_soroban"
+        echo -e "  Would call set_price USD/ARS: $usd_ars_soroban"
         return 0
     fi
 
-    echo -e "  ${CYAN}[4/4]${NC} Updating oracle on Stellar Testnet..."
+    echo -e "  ${CYAN}[4/4]${NC} Updating SEP-40 Oracle on Stellar Testnet..."
 
-    # Load contract ID
-    if [ ! -f "$KEYS_DIR/aurum_contract_id.txt" ]; then
-        echo -e "  ${RED}❌ Contract not deployed yet. Run build_and_deploy.sh first.${NC}"
+    # Load Oracle contract ID
+    if [ ! -f "$KEYS_DIR/oracle_contract_id.txt" ]; then
+        echo -e "  ${RED}❌ Oracle Contract not deployed yet. Run build_and_deploy.sh first.${NC}"
         return 1
     fi
 
-    local AURUM_CONTRACT_ID
-    AURUM_CONTRACT_ID=$(cat "$KEYS_DIR/aurum_contract_id.txt")
+    local ORACLE_CONTRACT_ID
+    ORACLE_CONTRACT_ID=$(cat "$KEYS_DIR/oracle_contract_id.txt")
 
+    # Update XAU/USD
     stellar contract invoke \
-        --id "$AURUM_CONTRACT_ID" \
+        --id "$ORACLE_CONTRACT_ID" \
         --source-account issuer \
         --network testnet \
         -- \
-        set_oracle_price \
-        --admin "$(stellar keys address issuer)" \
-        --new_price "$soroban_price" \
-        --source "$ORACLE_SOURCE" \
+        set_price \
+        --base_asset '{"Other":["XAU"]}' \
+        --quote_asset '{"Other":["USD"]}' \
+        --price "$xau_usd_soroban" \
         2>/dev/null
 
-    echo -e "  ${GREEN}✅ Oracle updated successfully!${NC}"
+    # Update USD/ARS
+    stellar contract invoke \
+        --id "$ORACLE_CONTRACT_ID" \
+        --source-account issuer \
+        --network testnet \
+        -- \
+        set_price \
+        --base_asset '{"Other":["USD"]}' \
+        --quote_asset '{"Other":["ARS"]}' \
+        --price "$usd_ars_soroban" \
+        2>/dev/null
+
+    echo -e "  ${GREEN}✅ Oracle pairs updated successfully!${NC}"
     echo ""
     echo -e "  ┌────────────────────────────────────────────────┐"
     echo -e "  │  📊 Oracle Update Summary                      │"
     echo -e "  ├────────────────────────────────────────────────┤"
     echo -e "  │  XAU/USD:    \$${gold_usd}                     │"
     echo -e "  │  USD/ARS:    \$${usd_ars}                      │"
-    echo -e "  │  GOLD/ARS:   \$${gold_ars_per_gram} per gram   │"
-    echo -e "  │  Soroban:    ${soroban_price}                  │"
-    echo -e "  │  Source:     ${ORACLE_SOURCE}                  │"
-    echo -e "  │  Contract:   ${AURUM_CONTRACT_ID:0:12}...      │"
+    echo -e "  │  Contract:   ${ORACLE_CONTRACT_ID:0:12}...      │"
     echo -e "  └────────────────────────────────────────────────┘"
 }
 

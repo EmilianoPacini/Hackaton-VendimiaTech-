@@ -14,6 +14,7 @@ const NETWORK_PASSPHRASE = 'Test SDF Network ; September 2015';
 // TODO: Reemplazar con los IDs reales generados por build_and_deploy.sh
 const AURUM_CONTRACT_ID = 'CBW2T5Y3WPOSSIBYYTNAQODW57FYGPEMNPONUZDRX7G7XFKMDDENJCWS';
 const GOLD_CONTRACT_ID = 'CD7FOEKQELTQGNVJB4J3QABGJY2JV2UONHD2QZ4PKACKYXYYU6BHCAXC';
+const ORACLE_CONTRACT_ID = 'CDGCLMNTFUCWLUKHAYVEQXRQKKVFZAC7PDHAIHLSEDLW23BODA4BTEM2';
 
 const TOKEN_DECIMALS = 10_000_000; // 7 decimales estándar Stellar
 
@@ -187,71 +188,96 @@ export const SorobanService = {
     const freighter = window.freighterApi;
     const server = new StellarSdk.rpc.Server(SOROBAN_RPC_URL);
 
-    const publicKey = this._publicKey;
-    if (!publicKey) throw new Error('Wallet no conectada.');
+    // 1. Verificar conexión a Freighter
+    const { isConnected } = await freighter.isConnected();
+    if (!isConnected) {
+      throw new Error('WALLET_NOT_CONNECTED');
+    }
+
+    // 2. Obtener dirección pública del usuario
+    const { address: publicKey, error: authError } = await freighter.getAddress();
+    if (authError || !publicKey) {
+      throw new Error('WALLET_AUTH_ERROR');
+    }
 
     const contract = new StellarSdk.Contract(AURUM_CONTRACT_ID);
     const senderAddress = new StellarSdk.Address(publicKey);
     const destAddress = new StellarSdk.Address(destination);
 
-    // Construir la transacción
-    const account = await server.getAccount(publicKey);
-    const tx = new StellarSdk.TransactionBuilder(account, {
-      fee: '10000000', // 1 XLM max fee (Soroban puede ser costoso en testnet)
-      networkPassphrase: NETWORK_PASSPHRASE,
-    })
-      .addOperation(
-        contract.call(
-          'pay_with_rwa',
-          senderAddress.toScVal(),
-          destAddress.toScVal(),
-          StellarSdk.nativeToScVal(BigInt(amountFiat), { type: 'i128' }),
-          StellarSdk.nativeToScVal(BigInt(maxGoldToSpend), { type: 'i128' })
+    // Convertir a ScVal BigInt compatible con i128
+    const amountFiatScVal = StellarSdk.nativeToScVal(BigInt(amountFiat), { type: 'i128' });
+    const maxGoldScVal = StellarSdk.nativeToScVal(BigInt(maxGoldToSpend), { type: 'i128' });
+
+    try {
+      // 3. Obtener estado de cuenta origen
+      const account = await server.getAccount(publicKey);
+
+      // 4. Construir Transacción
+      const tx = new StellarSdk.TransactionBuilder(account, {
+        fee: '100000', // Base fee, Soroban lo ajustará con el footprint
+        networkPassphrase: NETWORK_PASSPHRASE,
+      })
+        .addOperation(
+          contract.call('pay_with_rwa', senderAddress.toScVal(), destAddress.toScVal(), amountFiatScVal, maxGoldScVal)
         )
-      )
-      .setTimeout(60)
-      .build();
+        .setTimeout(60)
+        .build();
 
-    // Simular para obtener footprint y recursos
-    const simResult = await server.simulateTransaction(tx);
+      // 5. Simular la transacción (CRÍTICO EN SOROBAN)
+      const simulation = await server.simulateTransaction(tx);
 
-    if (StellarSdk.rpc.Api.isSimulationError(simResult)) {
-      throw new Error('Simulación fallida: ' + JSON.stringify(simResult.error));
+      if (StellarSdk.rpc.Api.isSimulationError(simulation)) {
+        if (simulation.error.includes('balance') || simulation.error.includes('Insufficient funds')) {
+          throw new Error('INSUFFICIENT_FUNDS');
+        }
+        throw new Error(`SIMULATION_FAILED: ${simulation.error}`);
+      }
+
+      // 6. Ensamblar TX con footprint
+      const preparedTx = StellarSdk.rpc.assembleTransaction(tx, simulation).build();
+
+      // 7. Firmar vía Freighter
+      const { signedTxXdr, error: signError } = await freighter.signTransaction(preparedTx.toXDR(), {
+        networkPassphrase: NETWORK_PASSPHRASE,
+      });
+
+      if (signError) {
+        throw new Error('SIGNATURE_REJECTED');
+      }
+
+      const signedTx = StellarSdk.TransactionBuilder.fromXDR(signedTxXdr, NETWORK_PASSPHRASE);
+
+      // 8. Enviar transacción a la red
+      const sendResponse = await server.sendTransaction(signedTx);
+      if (sendResponse.status === 'ERROR') {
+        throw new Error(`NETWORK_ERROR: ${JSON.stringify(sendResponse.errorResult)}`);
+      }
+
+      // 9. Esperar confirmación (polling)
+      let getResult;
+      const maxAttempts = 30;
+      for (let i = 0; i < maxAttempts; i++) {
+        getResult = await server.getTransaction(sendResponse.hash);
+        if (getResult.status !== 'NOT_FOUND') break;
+        await new Promise((r) => setTimeout(r, 1000));
+      }
+
+      if (!getResult || getResult.status === 'FAILED') {
+        throw new Error('NETWORK_ERROR: Transacción fallida on-chain.');
+      }
+
+      return {
+        status: 'success',
+        hash: sendResponse.hash,
+      };
+
+    } catch (error) {
+      // Clasificar timeouts genéricos
+      if (error.message.includes('timeout') || error.message.includes('fetch')) {
+        throw new Error('NETWORK_TIMEOUT');
+      }
+      throw error;
     }
-
-    // Preparar la TX con el footprint de la simulación
-    const preparedTx = StellarSdk.rpc.assembleTransaction(tx, simResult).build();
-
-    // Firmar con Freighter
-    const { signedTxXdr } = await freighter.signTransaction(preparedTx.toXDR(), {
-      networkPassphrase: NETWORK_PASSPHRASE,
-    });
-
-    // Enviar a la red
-    const signedTx = StellarSdk.TransactionBuilder.fromXDR(signedTxXdr, NETWORK_PASSPHRASE);
-    const sendResult = await server.sendTransaction(signedTx);
-
-    if (sendResult.status === 'ERROR') {
-      throw new Error('Error enviando TX: ' + JSON.stringify(sendResult.errorResult));
-    }
-
-    // Esperar confirmación (polling)
-    let getResult;
-    const maxAttempts = 30;
-    for (let i = 0; i < maxAttempts; i++) {
-      getResult = await server.getTransaction(sendResult.hash);
-      if (getResult.status !== 'NOT_FOUND') break;
-      await new Promise((r) => setTimeout(r, 1000));
-    }
-
-    if (!getResult || getResult.status === 'FAILED') {
-      throw new Error('La transacción falló on-chain.');
-    }
-
-    return {
-      status: 'success',
-      hash: sendResult.hash,
-    };
   },
 
   // ==========================================================================
@@ -279,6 +305,95 @@ export const SorobanService = {
         amount: 0,
         name: 'Desconocido',
       };
+    }
+  },
+
+  // ==========================================================================
+  // 6. Precio del Oro en ARS (vía Oráculo SEP-40 on-chain)
+  // ==========================================================================
+
+  /**
+   * Consulta el precio cruzado XAU→ARS desde el Oráculo SEP-40 desplegado.
+   * Realiza dos llamadas: XAU→USD y USD→ARS, y calcula el cross rate.
+   * @returns {Promise<{pricePerGramARS: number, xauUsd: number, usdArs: number}>}
+   */
+  async getGoldPriceARS() {
+    const StellarSdk = await waitForGlobal('StellarSdk');
+    const server = new StellarSdk.rpc.Server(SOROBAN_RPC_URL);
+    const contract = new StellarSdk.Contract(ORACLE_CONTRACT_ID);
+
+    // Necesitamos una cuenta para simular; usamos la conectada o una dummy
+    const sourceKey = this._publicKey || 'GAAZI4TCR3TY5OJHCTJC2A4QSY6CJWJH5IAJTGKIN2ER7LBNVKOCCWN7';
+    let account;
+    try {
+      account = await server.getAccount(sourceKey);
+    } catch {
+      // Si la cuenta dummy no tiene fondos, generar una TX dummy con keypair efímero
+      return { pricePerGramARS: 0, xauUsd: 0, usdArs: 0 };
+    }
+
+    /**
+     * Helper: invoca cross_price(base_asset, quote_asset, timestamp) y extrae el precio.
+     */
+    async function fetchCrossPrice(baseSymbol, quoteSymbol) {
+      // Construir los ScVals para el enum Asset::Other(Symbol)
+      const baseAssetScVal = StellarSdk.xdr.ScVal.scvVec([
+        StellarSdk.nativeToScVal(baseSymbol, { type: 'symbol' }),
+      ]);
+      // Envolver en la variante del enum: la variante "Other" tiene key="Other"
+      const baseEnum = StellarSdk.xdr.ScVal.scvMap([
+        new StellarSdk.xdr.ScMapEntry({
+          key: StellarSdk.nativeToScVal('Other', { type: 'symbol' }),
+          val: StellarSdk.xdr.ScVal.scvVec([
+            StellarSdk.nativeToScVal(baseSymbol, { type: 'symbol' }),
+          ]),
+        }),
+      ]);
+      const quoteEnum = StellarSdk.xdr.ScVal.scvMap([
+        new StellarSdk.xdr.ScMapEntry({
+          key: StellarSdk.nativeToScVal('Other', { type: 'symbol' }),
+          val: StellarSdk.xdr.ScVal.scvVec([
+            StellarSdk.nativeToScVal(quoteSymbol, { type: 'symbol' }),
+          ]),
+        }),
+      ]);
+      const timestampScVal = StellarSdk.nativeToScVal(0, { type: 'u64' });
+
+      const tx = new StellarSdk.TransactionBuilder(account, {
+        fee: '100',
+        networkPassphrase: NETWORK_PASSPHRASE,
+      })
+        .addOperation(contract.call('cross_price', baseEnum, quoteEnum, timestampScVal))
+        .setTimeout(30)
+        .build();
+
+      const sim = await server.simulateTransaction(tx);
+      if (StellarSdk.rpc.Api.isSimulationError(sim)) {
+        console.warn(`Error fetching ${baseSymbol}/${quoteSymbol}:`, sim);
+        return 0;
+      }
+
+      // Resultado es Option<PriceData> — si Some, retorna un Map con {price, timestamp}
+      const result = StellarSdk.scValToNative(sim.result.retval);
+      if (!result || result.length === 0) return 0;
+
+      // PriceData es un struct con fields price (i128) y timestamp (u64)
+      const price = result.price !== undefined ? Number(result.price) : Number(result[0]);
+      return price;
+    }
+
+    try {
+      const xauUsdRaw = await fetchCrossPrice('XAU', 'USD');
+      const usdArsRaw = await fetchCrossPrice('USD', 'ARS');
+
+      const xauUsd = xauUsdRaw / TOKEN_DECIMALS;
+      const usdArs = usdArsRaw / TOKEN_DECIMALS;
+      const pricePerGramARS = xauUsd * usdArs;
+
+      return { pricePerGramARS, xauUsd, usdArs };
+    } catch (err) {
+      console.error('Error consultando oráculo:', err);
+      return { pricePerGramARS: 0, xauUsd: 0, usdArs: 0 };
     }
   },
 };

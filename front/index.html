@@ -339,9 +339,29 @@
       }
     }
 
+    async function initOraclePrice() {
+      try {
+        const { pricePerGramARS, xauUsd, usdArs } = await SorobanService.getGoldPriceARS();
+
+        // Actualizar widget tGLD con precio real del oráculo
+        const tgldPriceEl = document.querySelector('.widget-tgld .widget-coin-price');
+        if (tgldPriceEl && pricePerGramARS > 0) {
+          tgldPriceEl.textContent = pricePerGramARS.toLocaleString('es-AR', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          }) + ' ARS';
+        }
+
+        console.log(`Oráculo SEP-40: 1 XAU = $${xauUsd} USD | 1 USD = ${usdArs} ARS | 1 tGLD = ${pricePerGramARS.toLocaleString()} ARS`);
+      } catch (err) {
+        console.warn('No se pudo obtener precio del oráculo:', err.message);
+      }
+    }
+
     // Intentar conectar al cargar
     window.addEventListener('load', () => {
-      setTimeout(initWallet, 1500); // Esperar a que Freighter inyecte la API
+      setTimeout(initWallet, 1500);
+      setTimeout(initOraclePrice, 2000);
     });
   </script>
 </body>
