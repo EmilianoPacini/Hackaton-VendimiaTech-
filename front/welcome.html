@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aurum Wallet — Welcome</title>
+  <meta name="description" content="Aurum Wallet Onboarding" />
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* Estilos específicos para Welcome */
+    .welcome-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 0 32px;
+      position: relative;
+      height: 100%;
+      z-index: 2;
+    }
+    
+    .welcome-logo {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, #eab308, #ca8a04);
+      border-radius: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 32px;
+      box-shadow: 0 12px 32px rgba(234, 179, 8, 0.4);
+      animation: float-logo 4s ease-in-out infinite;
+    }
+    .welcome-logo svg { width: 44px; height: 44px; stroke: white; }
+    
+    .welcome-title {
+      font-size: 32px;
+      font-weight: 800;
+      color: var(--color-text-primary);
+      line-height: 1.1;
+      margin-bottom: 16px;
+      letter-spacing: -0.5px;
+    }
+    .welcome-title span {
+      background: linear-gradient(135deg, #eab308, #ca8a04);
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .welcome-subtitle {
+      font-size: 15px;
+      color: var(--color-text-secondary);
+      line-height: 1.5;
+      margin-bottom: 64px;
+      max-width: 280px;
+    }
+
+    .btn-start {
+      background: var(--color-text-primary);
+      color: white;
+      text-decoration: none;
+      font-size: 16px;
+      font-weight: 700;
+      padding: 18px 48px;
+      border-radius: 32px;
+      width: 100%;
+      max-width: 280px;
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow: 0 12px 24px rgba(26, 26, 46, 0.2);
+      position: relative;
+      overflow: hidden;
+    }
+    .btn-start::after {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%;
+      width: 50%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      animation: shine 3s infinite 1s;
+    }
+    .btn-start:hover {
+      transform: translateY(-4px) scale(1.02);
+      box-shadow: 0 16px 32px rgba(26, 26, 46, 0.3);
+    }
+    
+    @keyframes float-logo {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-12px); }
+    }
+    @keyframes shine {
+      0% { left: -100%; }
+      20%, 100% { left: 200%; }
+    }
+  </style>
+</head>
+<body class="page-transition">
+
+  <div class="screen">
+    <div class="screen-content" style="padding: 0;">
+      
+      <!-- Ambient Blobs para Onboarding -->
+      <div class="ambient-blob blob-1" style="width: 300px; height: 300px; top: -100px; right: -100px; opacity: 0.3; background: #fef08a;"></div>
+      <div class="ambient-blob blob-2" style="width: 250px; height: 250px; bottom: -50px; left: -50px; opacity: 0.25;"></div>
+
+      <div class="welcome-screen">
+        <div class="welcome-logo">
+          <svg viewBox="0 0 24 24" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"></polygon>
+            <line x1="12" y1="22" x2="12" y2="15.5"></line>
+            <polyline points="22 8.5 12 15.5 2 8.5"></polyline>
+            <polyline points="2 15.5 12 8.5 22 15.5"></polyline>
+            <line x1="12" y1="2" x2="12" y2="8.5"></line>
+          </svg>
+        </div>
+        
+        <h1 class="welcome-title">Tu oro,<br><span>tangible y digital</span></h1>
+        <p class="welcome-subtitle">Experimentá la evolución de las finanzas con Aurum Wallet. Seguridad, educación y recompensas on-chain.</p>
+        
+        <a href="index.html" class="btn-start">Comenzar</a>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

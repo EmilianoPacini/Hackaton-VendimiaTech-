@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aurum Wallet — Seleccionar Activo</title>
+  <meta name="description" content="Asset Selection List" />
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .assets-list {
+      display: flex; flex-direction: column; gap: 12px; margin-top: 20px;
+    }
+    .asset-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px; background: var(--color-card-solid);
+      border: 1.5px solid var(--color-card-glass-border);
+      border-radius: var(--radius-md); text-decoration: none;
+      transition: all 0.3s ease;
+    }
+    .asset-item:hover { transform: translateX(4px); box-shadow: 0 4px 16px rgba(0,0,0,0.06); }
+    
+    .asset-left { display: flex; align-items: center; gap: 14px; }
+    .asset-icon {
+      width: 44px; height: 44px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; font-weight: 800; color: white;
+    }
+    .asset-info { display: flex; flex-direction: column; gap: 4px; }
+    .asset-name { font-size: 15px; font-weight: 700; color: var(--color-text-primary); }
+    .asset-price { font-size: 12px; font-weight: 600; color: var(--color-text-secondary); }
+    
+    .asset-right { text-align: right; }
+    .asset-balance { font-size: 15px; font-weight: 800; color: var(--color-text-primary); margin-bottom: 2px; }
+    .asset-fiat { font-size: 12px; color: var(--color-text-muted); }
+  </style>
+</head>
+<body class="page-transition">
+  <div class="screen">
+    <!-- Ambient Blobs -->
+    <div class="ambient-blob blob-1"></div>
+    <div class="ambient-blob blob-2" style="background:#fef08a;"></div>
+
+    <div class="screen-content">
+      
+
+
+      <div class="social-header" style="margin-top:10px;">
+        <a class="back-btn" href="index.html">
+          <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+        </a>
+        <h1>Enviar Activo</h1>
+      </div>
+
+      <div class="assets-list">
+        <a href="confirm-tx.html" class="asset-item">
+          <div class="asset-left">
+            <div class="asset-icon" style="background: linear-gradient(135deg, #eab308, #ca8a04);">
+              <svg viewBox="0 0 24 24" width="20" height="20" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"></polygon>
+                <line x1="12" y1="22" x2="12" y2="15.5"></line>
+                <polyline points="22 8.5 12 15.5 2 8.5"></polyline>
+                <polyline points="2 15.5 12 8.5 22 15.5"></polyline>
+                <line x1="12" y1="2" x2="12" y2="8.5"></line>
+              </svg>
+            </div>
+            <div class="asset-info">
+              <span class="asset-name">tGLD</span>
+              <span class="asset-price" style="color:#22c55e;">+2.14%</span>
+            </div>
+          </div>
+          <div class="asset-right">
+            <div class="asset-balance">0.415 tGLD</div>
+            <div class="asset-fiat">34.953,36 ARS</div>
+          </div>
+        </a>
+
+        <a href="confirm-tx.html" class="asset-item">
+          <div class="asset-left">
+            <div class="asset-icon" style="background: linear-gradient(135deg, #26a17b, #1f8b6b);">₮</div>
+            <div class="asset-info">
+              <span class="asset-name">USDT</span>
+              <span class="asset-price" style="color:#22c55e;">TEA 8.02%</span>
+            </div>
+          </div>
+          <div class="asset-right">
+            <div class="asset-balance">1.00 USDT</div>
+            <div class="asset-fiat">1.451,14 ARS</div>
+          </div>
+        </a>
+        
+        <a href="confirm-tx.html" class="asset-item">
+          <div class="asset-left">
+            <div class="asset-icon" style="background: linear-gradient(135deg, #3b82f6, #2563eb);">🇦🇷</div>
+            <div class="asset-info">
+              <span class="asset-name">Pesos ARS</span>
+              <span class="asset-price" style="color:#22c55e;">TEA 20.48%</span>
+            </div>
+          </div>
+          <div class="asset-right">
+            <div class="asset-balance">0,00 ARS</div>
+            <div class="asset-fiat">$0,00 USD</div>
+          </div>
+        </a>
+      </div>
+
+    </div>
+  </div>
+</body>
+</html>

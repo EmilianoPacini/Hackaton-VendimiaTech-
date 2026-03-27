@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aurum Wallet — Scan QR</title>
+  <meta name="description" content="Aurum Wallet QR Scanner" />
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* Estilos QR Scanner */
+    .qr-screen {
+      background: #000;
+      color: white;
+    }
+    .camera-view {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="800"><rect width="100%" height="100%" fill="%23111"/></svg>') center/cover no-repeat;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    /* Pseudo camera blur */
+    .camera-overlay {
+      position: absolute; inset: 0;
+      background: rgba(0, 0, 0, 0.4);
+      z-index: 1;
+    }
+    
+    .scanner-frame {
+      width: 250px;
+      height: 250px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      position: relative;
+      z-index: 2;
+      border-radius: 20px;
+      box-shadow: 0 0 0 9999px rgba(0,0,0,0.6); /* Oscurecer alrededor */
+      margin-bottom: 60px;
+    }
+    
+    .scanner-corners {
+      position: absolute; inset: -2px; z-index: 3;
+    }
+    .scanner-corners::before, .scanner-corners::after,
+    .scanner-corners span::before, .scanner-corners span::after {
+      content: '';
+      position: absolute;
+      width: 40px; height: 40px;
+      border-color: var(--color-accent-green);
+      border-style: solid;
+      border-width: 0;
+    }
+    .scanner-corners::before { top: 0; left: 0; border-width: 4px 0 0 4px; border-top-left-radius: 20px; }
+    .scanner-corners::after { top: 0; right: 0; border-width: 4px 4px 0 0; border-top-right-radius: 20px; }
+    .scanner-corners span::before { bottom: 0; left: 0; border-width: 0 0 4px 4px; border-bottom-left-radius: 20px; }
+    .scanner-corners span::after { bottom: 0; right: 0; border-width: 0 4px 4px 0; border-bottom-right-radius: 20px; }
+    
+    .scanner-line {
+      position: absolute;
+      left: 0; top: 0;
+      width: 100%; height: 2px;
+      background: var(--color-accent-green);
+      box-shadow: 0 0 10px 2px var(--color-accent-green);
+      animation: scan-vertical 2s linear infinite alternate;
+    }
+    
+    @keyframes scan-vertical {
+      0% { top: 0; opacity: 0; }
+      10% { opacity: 1; }
+      90% { opacity: 1; }
+      100% { top: 248px; opacity: 0; }
+    }
+    
+    .qr-header {
+      position: relative; z-index: 10;
+      display: flex; justify-content: space-between; align-items: center;
+      width: 100%; padding: 0 20px; margin-bottom: 20px;
+    }
+    .qr-header h1 { font-size: 18px; font-weight: 700; color: white; }
+    
+    .btn-icon-dark {
+      width: 40px; height: 40px;
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(12px);
+      border-radius: var(--radius-sm);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: all 0.3s ease;
+    }
+    .btn-icon-dark:hover { background: rgba(255, 255, 255, 0.25); transform: scale(1.05); }
+    .btn-icon-dark svg { width: 22px; height: 22px; stroke: white; stroke-width: 2; fill: none; }
+    
+    .qr-footer {
+      position: absolute; bottom: 40px; left: 0; width: 100%;
+      z-index: 10; display: flex; flex-direction: column; align-items: center; gap: 20px;
+    }
+    .qr-prompt { font-size: 14px; font-weight: 600; color: white; text-align: center; }
+    
+    .qr-actions { display: flex; gap: 20px; }
+    .qr-action-btn { display: flex; flex-direction: column; align-items: center; gap: 8px; text-decoration: none; cursor: pointer; }
+    .qr-action-icon {
+      width: 56px; height: 56px; border-radius: 50%;
+      background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(12px);
+      display: flex; align-items: center; justify-content: center;
+      border: 1px solid rgba(255,255,255,0.2); transition: all 0.3s ease;
+    }
+    .qr-action-btn:hover .qr-action-icon { background: rgba(255, 255, 255, 0.3); transform: scale(1.05); }
+    .qr-action-icon svg { width: 24px; height: 24px; stroke: white; fill: none; stroke-width: 2; }
+    .qr-action-label { font-size: 12px; font-weight: 600; color: white; }
+
+    /* Mockup Modal */
+    .mockup-modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+      z-index: 100; display: flex; align-items: flex-end; justify-content: center;
+      opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+    }
+    .mockup-modal-overlay.active { opacity: 1; pointer-events: auto; }
+    
+    .mockup-modal {
+      width: 100%; background: var(--color-card-solid);
+      border-top-left-radius: 24px; border-top-right-radius: 24px;
+      padding: 30px 24px; padding-bottom: 50px;
+      transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      border-top: 1px solid var(--color-card-glass-border);
+      color: white; text-align: center;
+    }
+    .mockup-modal.active { transform: translateY(0); }
+    
+    .modal-handle { width: 40px; height: 4px; background: rgba(255,255,255,0.2); border-radius: 2px; margin: 0 auto 20px auto; }
+    .modal-title { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+    .modal-subtitle { font-size: 14px; color: var(--color-text-secondary); margin-bottom: 24px; }
+    
+    .mockup-btn {
+      width: 100%;
+      background: linear-gradient(135deg, #22c55e, #10b981);
+      color: white; font-size: 16px; font-weight: 700;
+      padding: 16px; border-radius: 16px; border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .mockup-spinner {
+      width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: white; border-radius: 50%; animation: spin 1s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body class="page-transition">
+
+  <div class="screen qr-screen">
+    
+    <!-- Camera Background Base -->
+    <div class="camera-view">
+      <video id="camera-stream" autoplay playsinline style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0; z-index:0;"></video>
+      <div id="flash-overlay" style="position:absolute; inset:0; background:white; opacity:0; z-index:15; pointer-events:none; transition:opacity 0.2s;"></div>
+      
+      <div class="scanner-frame" id="scanner-frame" style="cursor: pointer;" title="Tocar para escanear">
+        <div class="scanner-corners"><span></span></div>
+        <div class="scanner-line"></div>
+      </div>
+    </div>
+
+    <div class="screen-content" style="padding-top: 50px;">
+      
+      <div class="qr-header">
+        <a class="btn-icon-dark" href="index.html">
+          <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+        </a>
+        <h1>Escanear código QR</h1>
+        <div class="btn-icon-dark">
+          <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        </div>
+      </div>
+
+      <div class="qr-footer">
+        <p class="qr-prompt">Apunta la cámara a un código QR de pago</p>
+        
+        <div class="qr-actions">
+          <div class="qr-action-btn">
+            <div class="qr-action-icon">
+              <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            </div>
+            <span class="qr-action-label">Subir Imagen</span>
+          </div>
+          <a class="qr-action-btn" href="confirm-tx.html">
+            <div class="qr-action-icon">
+              <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            </div>
+            <span class="qr-action-label">Usar e-mail</span>
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Modal Mockup -->
+  <div class="mockup-modal-overlay" id="mockupModalOverlay">
+    <div class="mockup-modal" id="mockupModal">
+      <div class="modal-handle"></div>
+      <div id="modalLoadingState">
+        <div class="mockup-spinner" style="margin: 0 auto 16px auto; width: 32px; height: 32px; border-width: 3px;"></div>
+        <h3 class="modal-title">Procesando código QR...</h3>
+        <p class="modal-subtitle">Obteniendo datos de pago</p>
+      </div>
+      <div id="modalReadyState" style="display: none;">
+        <div style="font-size: 40px; margin-bottom: 12px;">☕</div>
+        <h3 class="modal-title">Cafetería "El Gato"</h3>
+        <p class="modal-subtitle">Solicitud de 2.450 ARS</p>
+        <button class="mockup-btn" id="btnContinue">
+          Continuar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Inicializar cámara trasera
+    const video = document.getElementById('camera-stream');
+    const scannerFrame = document.getElementById('scanner-frame');
+    const flashOverlay = document.getElementById('flash-overlay');
+    
+    // Solicitar acceso a la cámara (preferentemente trasera)
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      navigator.mediaDevices.getUserMedia({ 
+        video: { facingMode: "environment" } 
+      })
+      .then(function(stream) {
+        video.srcObject = stream;
+        video.play();
+      })
+      .catch(function(err) {
+        console.warn("Sin acceso a cámara, usando fondo por defecto.", err);
+      });
+    }
+
+    // Función que corre la simulación del escaneo
+    function simulateScan() {
+      // Audio synth beep
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(880, ctx.currentTime); // A5 nota aguda
+      gain.gain.setValueAtTime(0.1, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.1);
+
+      // Flash visual
+      flashOverlay.style.opacity = '1';
+      scannerFrame.style.borderColor = '#22c55e'; // Verde éxito
+      
+      // Detener stream y mostrar modal mockup
+      setTimeout(() => {
+        flashOverlay.style.opacity = '0';
+        if(video.srcObject) {
+          video.srcObject.getTracks().forEach(t => t.stop());
+        }
+        
+        // Mostrar Modal Mockup en lugar de navegar directo
+        const overlay = document.getElementById('mockupModalOverlay');
+        const modal = document.getElementById('mockupModal');
+        const loadingState = document.getElementById('modalLoadingState');
+        const readyState = document.getElementById('modalReadyState');
+        
+        overlay.classList.add('active');
+        modal.classList.add('active');
+        
+        // Simular carga y luego mostrar el botón
+        setTimeout(() => {
+          loadingState.style.display = 'none';
+          readyState.style.display = 'block';
+        }, 1200);
+        
+      }, 300);
+    }
+
+    // Simular un escaneo al hacer click
+    scannerFrame.addEventListener('click', simulateScan);
+
+    // Auto-disparar la simulación a los 2.5 segundos para la demo
+    setTimeout(simulateScan, 2500);
+
+    document.getElementById('btnContinue').addEventListener('click', () => {
+      // Leer datos del modal para pasarlos como query params
+      const name = document.querySelector('#modalReadyState .modal-title')?.textContent || 'Comercio';
+      const subtitleEl = document.querySelector('#modalReadyState .modal-subtitle');
+      let amount = '2450';
+      if (subtitleEl) {
+        const match = subtitleEl.textContent.match(/([\d.,]+)/);
+        if (match) amount = match[1].replace(/\./g, '').replace(',', '');
+      }
+      // Dirección merchant de demo (reemplazar con dato real del QR)
+      const dest = 'PLACEHOLDER_MERCHANT_ADDR';
+      window.location.href = `confirm-tx.html?dest=${encodeURIComponent(dest)}&amount=${amount}&name=${encodeURIComponent(name)}`;
+    });
+  </script>
+</body>
+</html>

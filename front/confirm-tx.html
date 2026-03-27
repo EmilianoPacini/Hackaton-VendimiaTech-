@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aurum Wallet — Confirmar Pago</title>
+  <meta name="description" content="Aurum Wallet Confirm TX" />
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* Estilos Confirm TX */
+    .confirm-header {
+      display: flex; align-items: center; justify-content: center;
+      position: relative; margin-bottom: 30px;
+    }
+    .confirm-header h1 { font-size: 18px; font-weight: 700; color: var(--color-text-primary); }
+    .confirm-header .btn-back {
+      position: absolute; left: 0; top: 50%; transform: translateY(-50%);
+      width: 36px; height: 36px;
+      background: var(--color-card-glass); backdrop-filter: blur(12px);
+      border: 1.5px solid var(--color-card-glass-border); border-radius: var(--radius-sm);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .confirm-header .btn-back svg { width: 18px; height: 18px; stroke: var(--color-text-primary); stroke-width: 2.5; fill: none; }
+
+    .tx-card {
+      background: var(--color-card-solid);
+      backdrop-filter: blur(16px);
+      border: 1.5px solid var(--color-card-glass-border);
+      border-radius: var(--radius-md);
+      padding: 24px;
+      text-align: center;
+      margin-bottom: 20px;
+      box-shadow: 0 12px 32px rgba(0,0,0,0.08);
+      animation: tx-card-enter 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    }
+    @keyframes tx-card-enter {
+      from { transform: translateY(20px) scale(0.95); opacity: 0; }
+      to { transform: translateY(0) scale(1); opacity: 1; }
+    }
+    
+    .tx-recipient {
+      display: flex; flex-direction: column; align-items: center; gap: 8px; margin-bottom: 24px;
+    }
+    .tx-recipient-avatar {
+      width: 64px; height: 64px; border-radius: 50%;
+      background: linear-gradient(135deg, #a78bfa, #c084fc);
+      display: flex; align-items: center; justify-content: center; font-size: 32px;
+      box-shadow: 0 8px 16px rgba(167, 139, 250, 0.4);
+    }
+    .tx-recipient-name { font-size: 16px; font-weight: 700; color: var(--color-text-primary); }
+    .tx-recipient-address { font-size: 12px; color: var(--color-text-muted); font-family: monospace; }
+    
+    .tx-amount { margin-bottom: 24px; }
+    .tx-amount h2 { font-size: 42px; font-weight: 800; color: var(--color-text-primary); margin-bottom: 4px; letter-spacing: -1px; }
+    .tx-amount p { font-size: 14px; font-weight: 600; color: #eab308; } /* tGLD Color */
+    
+    .tx-details { border-top: 1px dashed var(--color-card-glass-border); padding-top: 16px; text-align: left; }
+    .tx-detail-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 13px; }
+    .tx-detail-label { color: var(--color-text-secondary); font-weight: 500; }
+    .tx-detail-value { color: var(--color-text-primary); font-weight: 700; }
+    
+    /* Gesto: Swipe to Pay */
+    .swipe-container {
+      width: 100%; height: 64px;
+      background: var(--color-card-glass);
+      border: 1.5px solid var(--color-card-glass-border);
+      border-radius: 32px;
+      position: relative;
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden;
+      margin-top: auto;
+      margin-bottom: 40px;
+    }
+    .swipe-text { font-size: 14px; font-weight: 700; color: var(--color-text-muted); pointer-events: none; z-index: 1; }
+    .swipe-btn {
+      width: 56px; height: 56px;
+      background: linear-gradient(135deg, #22c55e, #10b981);
+      border-radius: 50%;
+      position: absolute; left: 4px; top: 4px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: grab; z-index: 2;
+      box-shadow: 0 4px 12px rgba(34, 197, 94, 0.4);
+    }
+    .swipe-btn:active { cursor: grabbing; transform: scale(0.95); }
+    .swipe-btn svg { width: 24px; height: 24px; stroke: white; stroke-width: 2.5; fill: none; }
+    
+    .swipe-fill {
+      position: absolute; left: 0; top: 0; height: 100%; width: 0;
+      background: rgba(34, 197, 94, 0.15); border-radius: 32px; z-index: 0;
+    }
+  </style>
+</head>
+<body class="page-transition">
+
+  <div class="screen">
+    <!-- Ambient Blobs -->
+    <div class="ambient-blob blob-1"></div>
+    <div class="ambient-blob blob-2" style="background:#fef08a;"></div>
+
+    <div class="screen-content" style="display:flex; flex-direction:column;">
+      
+
+
+      <div class="confirm-header">
+        <a href="qr-scan.html" class="btn-back">
+          <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+        </a>
+        <h1>Confirmar Pago</h1>
+      </div>
+
+      <div class="tx-card">
+        <div class="tx-recipient">
+          <div class="tx-recipient-avatar">☕</div>
+          <div class="tx-recipient-name">Cafetería "El Gato"</div>
+          <div class="tx-recipient-address">0x12aF...9c4B</div>
+        </div>
+        
+        <div class="tx-amount">
+          <h2>- 2.450 ARS</h2>
+          <p>0.082 tGLD</p>
+        </div>
+        
+        <div class="tx-details">
+
+          <div class="tx-detail-row">
+            <span class="tx-detail-label">Fee de Red (Gas)</span>
+            <span class="tx-detail-value">0.00 ARS <span style="color:#22c55e; font-size:10px;">(Subsidized)</span></span>
+          </div>
+          <div class="tx-detail-row">
+            <span class="tx-detail-label">Total Gasto</span>
+            <span class="tx-detail-value">2.450 ARS</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="swipe-container" id="swipe-container">
+        <div class="swipe-fill" id="swipe-fill"></div>
+        <span class="swipe-text" id="swipe-text">Desliza para pagar</span>
+        <div class="swipe-btn" id="swipe-btn">
+          <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Stellar SDK (CDN) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/stellar-sdk/12.3.0/stellar-sdk.min.js"></script>
+
+  <script type="module">
+    import { SorobanService } from './sorobanService.js';
+
+    // Leer parámetros de la URL
+    const params = new URLSearchParams(window.location.search);
+    const dest = params.get('dest') || '';
+    const amount = params.get('amount') || '2450';
+    const name = params.get('name') || 'Comercio';
+
+    // Poblar la tarjeta de confirmación con datos reales
+    const nameEl = document.querySelector('.tx-recipient-name');
+    const addrEl = document.querySelector('.tx-recipient-address');
+    const amountEl = document.querySelector('.tx-amount h2');
+    const totalEl = document.querySelectorAll('.tx-detail-value')[1]; // "Total Gasto"
+
+    if (nameEl) nameEl.textContent = name;
+    if (addrEl) addrEl.textContent = dest ? (dest.slice(0, 6) + '...' + dest.slice(-4)) : '—';
+    if (amountEl) amountEl.textContent = `- ${Number(amount).toLocaleString('es-AR')} ARS`;
+    if (totalEl) totalEl.textContent = `${Number(amount).toLocaleString('es-AR')} ARS`;
+
+    // Swipe to Pay logic
+    const btn = document.getElementById('swipe-btn');
+    const container = document.getElementById('swipe-container');
+    const fill = document.getElementById('swipe-fill');
+    const text = document.getElementById('swipe-text');
+    
+    let isDragging = false;
+    let startX = 0;
+    let paymentInProgress = false;
+    
+    const maxDrag = container.clientWidth - btn.clientWidth - 8;
+    
+    const startDrag = (e) => {
+      if (paymentInProgress) return;
+      isDragging = true;
+      startX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+      btn.style.transition = 'none';
+      fill.style.transition = 'none';
+    };
+    
+    const onDrag = (e) => {
+      if (!isDragging) return;
+      const x = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+      let walk = x - startX;
+      
+      if (walk < 0) walk = 0;
+      if (walk > maxDrag) walk = maxDrag;
+      
+      btn.style.transform = `translateX(${walk}px)`;
+      fill.style.width = `${walk + 28}px`;
+      
+      if (walk > maxDrag * 0.95) {
+        completePayment();
+      }
+    };
+    
+    const stopDrag = () => {
+      if (!isDragging) return;
+      isDragging = false;
+      if (!paymentInProgress) {
+        btn.style.transition = 'all 0.3s ease';
+        fill.style.transition = 'all 0.3s ease';
+        btn.style.transform = `translateX(0px)`;
+        fill.style.width = '0px';
+      }
+    };
+    
+    btn.addEventListener('mousedown', startDrag);
+    btn.addEventListener('touchstart', startDrag);
+    document.addEventListener('mousemove', onDrag);
+    document.addEventListener('touchmove', onDrag);
+    document.addEventListener('mouseup', stopDrag);
+    document.addEventListener('touchend', stopDrag);
+    
+    async function completePayment() {
+      if (paymentInProgress) return;
+      paymentInProgress = true;
+      isDragging = false;
+      btn.style.pointerEvents = 'none';
+      text.textContent = 'Conectando wallet...';
+
+      try {
+        // 1. Conectar wallet
+        await SorobanService.connectWallet();
+        text.textContent = 'Calculando GOLD...';
+
+        // 2. Convertir monto ARS a 7 decimales para el contrato
+        const amountFiat7Dec = BigInt(amount) * BigInt(10_000_000);
+
+        // 3. Obtener preview de cuánto GOLD se necesita
+        const preview = await SorobanService.getPaymentPreview(amountFiat7Dec.toString());
+        text.textContent = 'Firmando con Freighter...';
+
+        // 4. Calcular slippage (+1%)
+        const maxGold = BigInt(Math.ceil(Number(preview.raw) * 1.01));
+
+        // 5. Ejecutar pago real on-chain
+        const result = await SorobanService.executePayment(
+          dest,
+          amountFiat7Dec.toString(),
+          maxGold.toString()
+        );
+
+        // 6. Redirigir a pantalla de éxito con el hash real
+        window.location.href = `success-tx.html?hash=${result.hash}&dest=${encodeURIComponent(name)}&amount=${amount}`;
+
+      } catch (err) {
+        console.error('Error en pago:', err);
+        text.textContent = 'Error: ' + (err.message || 'Intenta de nuevo');
+
+        // Resetear swipe tras error
+        setTimeout(() => {
+          paymentInProgress = false;
+          btn.style.pointerEvents = 'auto';
+          btn.style.transition = 'all 0.3s ease';
+          fill.style.transition = 'all 0.3s ease';
+          btn.style.transform = 'translateX(0px)';
+          fill.style.width = '0px';
+          text.textContent = 'Desliza para pagar';
+        }, 2500);
+      }
+    }
+  </script>
+
+</body>
+</html>
