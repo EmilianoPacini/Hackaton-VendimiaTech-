@@ -1,0 +1,20 @@
+# Rust / Cargo
+target/
+debug/
+**/*.rs.bk
+
+# Soroban específicas
+.soroban/
+*.wasm
+
+# Archivos de SO e IDEs
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Node.js (por si agregas un frontend después)
+node_modules/
+.env
+
