@@ -214,27 +214,35 @@
   </div>
 
   <script>
-    // Inicializar cámara trasera
+    // Inicializar variables
     const video = document.getElementById('camera-stream');
     const scannerFrame = document.getElementById('scanner-frame');
     const flashOverlay = document.getElementById('flash-overlay');
+    let cameraInitialized = false;
     
-    // Solicitar acceso a la cámara (preferentemente trasera)
-    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-      navigator.mediaDevices.getUserMedia({ 
-        video: { facingMode: "environment" } 
-      })
-      .then(function(stream) {
-        video.srcObject = stream;
-        video.play();
-      })
-      .catch(function(err) {
-        console.warn("Sin acceso a cámara, usando fondo por defecto.", err);
-      });
+    // Función para inicializar cámara trasera
+    function initializeCamera() {
+      if (cameraInitialized) return; // Evitar inicializar múltiples veces
+      
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices.getUserMedia({ 
+          video: { facingMode: "environment" } 
+        })
+        .then(function(stream) {
+          video.srcObject = stream;
+          video.play();
+          cameraInitialized = true;
+        })
+        .catch(function(err) {
+          console.warn("Sin acceso a cámara, usando fondo por defecto.", err);
+        });
+      }
     }
 
     // Función que corre la simulación del escaneo
     function simulateScan() {
+      // Inicializar cámara solo cuando se presiona para escanear
+      initializeCamera();
       // Audio synth beep
       const ctx = new (window.AudioContext || window.webkitAudioContext)();
       const osc = ctx.createOscillator();
@@ -279,9 +287,6 @@
 
     // Simular un escaneo al hacer click
     scannerFrame.addEventListener('click', simulateScan);
-
-    // Auto-disparar la simulación a los 2.5 segundos para la demo
-    setTimeout(simulateScan, 2500);
 
     document.getElementById('btnContinue').addEventListener('click', () => {
       // Leer datos del modal para pasarlos como query params

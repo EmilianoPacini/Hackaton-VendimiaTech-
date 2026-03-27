@@ -33,13 +33,7 @@
 
       <!-- Header Row -->
       <div class="header-row">
-        <button class="settings-btn" id="settings-btn" aria-label="Settings">
-          <svg viewBox="0 0 24 24">
-            <circle cx="12" cy="12" r="3" />
-            <path
-              d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z" />
-          </svg>
-        </button>
+        <div></div>
         <div class="streak-badge">
           <div class="streak-fire">
             <span class="fire-icon">🔥</span>
@@ -61,11 +55,7 @@
           <!-- Tooltip interactivo -->
           <div id="mascot-tooltip" class="mascot-tooltip">¡Hola! Toca para ver datos</div>
         </div>
-        <div class="dots-indicator">
-          <span class="dot active" data-index="0"></span>
-          <span class="dot" data-index="1"></span>
-          <span class="dot" data-index="2"></span>
-        </div>
+
       </div>
 
       <!-- Balance Section -->
@@ -85,7 +75,7 @@
           </div>
           <span class="action-btn-label">Send</span>
         </a>
-        <div class="action-btn" id="btn-receive">
+        <a href="receive.html" class="action-btn" id="btn-receive" style="text-decoration:none;">
           <div class="action-btn-circle">
             <svg viewBox="0 0 24 24">
               <polyline points="7 13 12 18 17 13" />
@@ -94,18 +84,8 @@
             </svg>
           </div>
           <span class="action-btn-label">Receive</span>
-        </div>
-        <a href="assets-list.html" class="action-btn" id="btn-swap" style="text-decoration:none;">
-          <div class="action-btn-circle">
-            <svg viewBox="0 0 24 24">
-              <polyline points="17 1 21 5 17 9" />
-              <path d="M3 11V9a4 4 0 0 1 4-4h14" />
-              <polyline points="7 23 3 19 7 15" />
-              <path d="M21 13v2a4 4 0 0 1-4 4H3" />
-            </svg>
-          </div>
-          <span class="action-btn-label">Swap</span>
         </a>
+
         <a href="qr-scan.html" class="action-btn" id="btn-qr" style="text-decoration:none;">
           <div class="action-btn-circle">
             <svg viewBox="0 0 24 24">
@@ -124,6 +104,17 @@
           </div>
           <span class="action-btn-label">QR Pay</span>
         </a>
+
+        <a href="swap.html" class="action-btn" id="btn-swap" style="text-decoration:none;">
+          <div class="action-btn-circle">
+            <svg viewBox="0 0 24 24">
+              <line x1="12" y1="5" x2="12" y2="19" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+              <polyline points="19 12 12 19 5 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              <polyline points="5 12 12 5 19 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </div>
+          <span class="action-btn-label">Swap</span>
+        </a>
       </div>
 
       <!-- ================================ -->
@@ -140,6 +131,26 @@
         </div>
         <div class="portfolio-row-right">
           <span class="yield-badge">20.48%</span>
+          <svg class="row-arrow" viewBox="0 0 24 24" width="18" height="18">
+            <polyline points="9 18 15 12 9 6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"
+              stroke-linejoin="round" />
+          </svg>
+        </div>
+      </div>
+
+      <!-- ================================ -->
+      <!--   ORO (GOLD) SECTION             -->
+      <!-- ================================ -->
+      <div class="portfolio-row">
+        <div class="portfolio-row-left">
+          <span class="portfolio-row-title">Oro</span>
+          <div class="portfolio-row-amount">
+            <span class="currency-value" id="gold-amount">8.7543210</span>
+            <span class="currency-code">tGLD</span>
+          </div>
+        </div>
+        <div class="portfolio-row-right">
+          <div class="crypto-icon-badge" style="background: linear-gradient(135deg, #eab308, #ca8a04); font-size: 16px; line-height: 1;">💛</div>
           <svg class="row-arrow" viewBox="0 0 24 24" width="18" height="18">
             <polyline points="9 18 15 12 9 6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"
               stroke-linejoin="round" />
@@ -194,7 +205,7 @@
               </div>
               <span class="widget-change positive">+2.14%</span>
             </div>
-            <div class="widget-coin-name">tGLD</div>
+            <div class="widget-coin-name">T Oro</div>
             <div class="widget-coin-price">84.230,50 ARS</div>
           </div>
           <!-- USDT Widget -->
@@ -206,8 +217,63 @@
                 <span class="widget-change positive">8.02%</span>
               </div>
             </div>
-            <div class="widget-coin-name">USDT</div>
+            <div class="widget-coin-name">T USDT</div>
             <div class="widget-coin-price">1.451,14 ARS</div>
+          </div>
+          <!-- Petróleo Widget -->
+          <div class="widget-card widget-oil">
+            <div class="widget-card-header">
+              <div class="widget-coin-icon" style="background: linear-gradient(135deg, #1f2937, #374151);">
+                🛢️
+              </div>
+              <span class="widget-change positive">+3.21%</span>
+            </div>
+            <div class="widget-coin-name">T Petróleo</div>
+            <div class="widget-coin-price">97.450,00 ARS</div>
+          </div>
+          <!-- Soja Widget -->
+          <div class="widget-card widget-soya">
+            <div class="widget-card-header">
+              <div class="widget-coin-icon" style="background: linear-gradient(135deg, #8b7500, #b8a000);">
+                🌾
+              </div>
+              <span class="widget-change positive">+1.85%</span>
+            </div>
+            <div class="widget-coin-name">T Soja</div>
+            <div class="widget-coin-price">18.950,75 ARS</div>
+          </div>
+          <!-- Cobre Widget -->
+          <div class="widget-card widget-copper">
+            <div class="widget-card-header">
+              <div class="widget-coin-icon" style="background: linear-gradient(135deg, #b87333, #d4773e);">
+                🔧
+              </div>
+              <span class="widget-change negative">-0.45%</span>
+            </div>
+            <div class="widget-coin-name">T Cobre</div>
+            <div class="widget-coin-price">42.820,25 ARS</div>
+          </div>
+          <!-- Plata Widget -->
+          <div class="widget-card widget-silver">
+            <div class="widget-card-header">
+              <div class="widget-coin-icon" style="background: linear-gradient(135deg, #c0c0c0, #e8e8e8);">
+                ⚫
+              </div>
+              <span class="widget-change positive">+5.10%</span>
+            </div>
+            <div class="widget-coin-name">T Plata</div>
+            <div class="widget-coin-price">28.400,50 ARS</div>
+          </div>
+          <!-- Maíz Widget -->
+          <div class="widget-card widget-corn">
+            <div class="widget-card-header">
+              <div class="widget-coin-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                🌽
+              </div>
+              <span class="widget-change positive">+2.33%</span>
+            </div>
+            <div class="widget-coin-name">T Maíz</div>
+            <div class="widget-coin-price">12.650,90 ARS</div>
           </div>
           <!-- Nuevo Sobre Widget -->
           <div class="widget-card widget-sobre">
@@ -283,35 +349,35 @@
 
       <div style="height: 10px;"></div>
 
-      <!-- Bottom Navigation -->
-      <nav class="bottom-nav">
-        <a class="nav-item active" href="index.html"><svg viewBox="0 0 24 24">
-            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z" />
-            <polyline points="9 22 9 12 15 12 15 22" />
-          </svg></a>
-        <a class="nav-item" href="education-map.html"><svg viewBox="0 0 24 24">
-            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2Z" />
-            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7Z" />
-          </svg></a>
-        <a class="nav-item" href="social-guilds.html"><svg viewBox="0 0 24 24">
-            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-            <circle cx="9" cy="7" r="4" />
-            <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-          </svg></a>
-        <a class="nav-item" href="reward.html"><svg viewBox="0 0 24 24">
-            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-            <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-          </svg><span class="notification-dot"></span></a>
-        <a class="nav-item" href="settings.html"><svg viewBox="0 0 24 24">
-            <circle cx="12" cy="12" r="3" />
-            <path
-              d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z" />
-          </svg></a>
-      </nav>
-
     </div>
   </div>
+
+  <!-- Bottom Navigation (fuera del screen para position:fixed) -->
+  <nav class="bottom-nav">
+    <a class="nav-item active" href="index.html"><svg viewBox="0 0 24 24">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z" />
+        <polyline points="9 22 9 12 15 12 15 22" />
+      </svg></a>
+    <a class="nav-item" href="education-map.html"><svg viewBox="0 0 24 24">
+        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2Z" />
+        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7Z" />
+      </svg></a>
+    <a class="nav-item" href="social-guilds.html"><svg viewBox="0 0 24 24">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+        <circle cx="9" cy="7" r="4" />
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+      </svg></a>
+    <a class="nav-item" href="reward.html"><svg viewBox="0 0 24 24">
+        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+        <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+      </svg><span class="notification-dot"></span></a>
+    <a class="nav-item" href="settings.html"><svg viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="3" />
+        <path
+          d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z" />
+      </svg></a>
+  </nav>
 
   <script src="app.js"></script>
   <script type="module" src="mascot3d.js"></script>
@@ -324,6 +390,7 @@
 
     async function initWallet() {
       const balanceEl = document.getElementById('balance-value');
+      const goldAmountEl = document.getElementById('gold-amount');
       try {
         const { address } = await SorobanService.connectWallet();
         console.log('Wallet conectada:', address);
@@ -333,8 +400,13 @@
         if (balanceEl) {
           balanceEl.textContent = formatted + ' GOLD';
         }
+        // Actualizar monto de oro con valor real
+        if (goldAmountEl) {
+          goldAmountEl.textContent = formatted;
+        }
       } catch (err) {
         console.warn('Freighter no disponible, usando datos mock:', err.message);
+        // Los datos ficticios ya están en el HTML, no necesitamos hacer nada
       }
     }
 

@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initDotsInteraction();
   initActionButtonRipple();
   initNavInteraction();
+  initFloatingSettingsButton();
 });
 
 /* --- Animated Balance Counter --- */
@@ -104,11 +105,87 @@ function initActionButtonRipple() {
 /* --- Bottom Nav Interaction --- */
 function initNavInteraction() {
   const navItems = document.querySelectorAll('.nav-item');
+  const screenContent = document.querySelector('.screen-content');
 
   navItems.forEach((item) => {
-    item.addEventListener('click', () => {
+    item.addEventListener('click', (e) => {
+      const href = item.getAttribute('href');
+      
+      // Si es un link válido y no es la página actual
+      if (href && !href.startsWith('javascript')) {
+        // Solo animar si no está ya activo
+        if (!item.classList.contains('active')) {
+          e.preventDefault();
+          
+          // Agregar clase de transición
+          if (screenContent) {
+            screenContent.style.opacity = '0';
+            screenContent.style.transform = 'translateY(8px)';
+          }
+          
+          // Navegar después de la animación
+          setTimeout(() => {
+            window.location.href = href;
+          }, 300);
+          
+          return;
+        }
+      }
+      
+      // Actualizar estado activo del nav
       navItems.forEach((n) => n.classList.remove('active'));
       item.classList.add('active');
     });
   });
+  
+  // Animar entrada cuando la página carga
+  if (screenContent) {
+    screenContent.style.opacity = '1';
+    screenContent.style.transform = 'translateY(0)';
+    screenContent.style.transition = 'opacity 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)';
+  }
 }
+
+/* --- Floating Settings Button --- */
+function initFloatingSettingsButton() {
+  const floatingBtn = document.querySelector('.floating-settings-btn');
+  if (!floatingBtn) return;
+
+  floatingBtn.addEventListener('click', () => {
+    const navElement = document.querySelector('.bottom-nav');
+    if (navElement) {
+      // Smooth scroll to the nav element
+      navElement.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      
+      // Highlight the nav by adding a pulse effect
+      navElement.style.animation = 'none';
+      navElement.offsetHeight; // force reflow
+      navElement.style.animation = 'nav-pulse 0.6s ease-out';
+      
+      setTimeout(() => {
+        navElement.style.animation = 'none';
+      }, 600);
+    }
+  });
+}
+
+/* Add nav pulse animation if not already present */
+if (!document.getElementById('nav-pulse-style')) {
+  const style = document.createElement('style');
+  style.id = 'nav-pulse-style';
+  style.textContent = `
+    @keyframes nav-pulse {
+      0% {
+        box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4);
+      }
+      50% {
+        box-shadow: 0 0 0 8px rgba(34, 197, 94, 0);
+      }
+      100% {
+        box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+      }
+    }
+  `;
+  document.head.appendChild(style);
+}
+

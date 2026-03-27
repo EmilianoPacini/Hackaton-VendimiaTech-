@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aurum Swap - Token Exchange</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- Phone Frame -->
+  <div class="screen">
+    <div class="screen-content">
+      <!-- Header -->
+      <div class="header-row" style="margin-bottom: 24px;">
+        <a href="index.html" style="text-decoration: none;">
+          <svg class="header-back-btn" viewBox="0 0 24 24" width="22" height="22" stroke="var(--color-text-primary)" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </a>
+        <h1 style="font-size: 20px; font-weight: 700; color: var(--color-text-primary); flex: 1; text-align: center;">Swap Tokens</h1>
+        <div style="width: 22px;"></div>
+      </div>
+
+      <!-- Swap Container -->
+      <div class="swap-container">
+        <!-- From Token Section -->
+        <div class="swap-section">
+          <label class="swap-label">De</label>
+          <div class="swap-input-group">
+            <input type="number" id="from-amount" class="swap-input" placeholder="0.0" step="0.0001" />
+            <div class="token-selector-wrapper">
+              <button class="swap-token-selector" id="from-token-btn">
+                <span class="token-icon">🇦🇷</span>
+                <span class="token-code" id="from-token-code">ARS</span>
+                <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round">
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+              </button>
+              <div class="token-dropdown" id="from-dropdown" style="display: none;">
+                <!-- Tokens will be rendered here -->
+              </div>
+            </div>
+          </div>
+          <p class="token-balance" id="from-balance">Balance: $0,00</p>
+        </div>
+
+        <!-- Swap Icon -->
+        <div class="swap-toggle">
+          <button id="swap-direction-btn" class="swap-direction-icon" title="Invertir tokens">
+            <svg viewBox="0 0 24 24" width="20" height="20" stroke="var(--color-accent-green)" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <polyline points="19 12 12 19 5 12"></polyline>
+            </svg>
+          </button>
+        </div>
+
+        <!-- To Token Section -->
+        <div class="swap-section">
+          <label class="swap-label">A</label>
+          <div class="swap-input-group">
+            <input type="number" id="to-amount" class="swap-input" placeholder="0.0" step="0.0001" readonly />
+            <div class="token-selector-wrapper">
+              <button class="swap-token-selector" id="to-token-btn">
+                <span class="token-icon">💛</span>
+                <span class="token-code" id="to-token-code">tGLD</span>
+                <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round">
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+              </button>
+              <div class="token-dropdown" id="to-dropdown" style="display: none;">
+                <!-- Tokens will be rendered here -->
+              </div>
+            </div>
+          </div>
+          <p class="token-balance" id="to-balance">Balance: 8.7543210</p>
+        </div>
+      </div>
+
+      <!-- Exchange Rate Info -->
+      <div class="exchange-info">
+        <div class="exchange-row">
+          <span class="exchange-label">Tasa de cambio</span>
+          <span class="exchange-value" id="exchange-rate">1 ARS = 0.0001 tGLD</span>
+        </div>
+        <div class="exchange-row">
+          <span class="exchange-label">Comisión estimada</span>
+          <span class="exchange-value" id="exchange-fee">0.01 ARS (0.5%)</span>
+        </div>
+      </div>
+
+      <!-- Swap Button -->
+      <button id="confirm-swap-btn" class="action-btn-large">
+        <span>Confirmar Intercambio</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Bottom Navigation (fuera del screen para position:fixed) -->
+  <nav class="bottom-nav">
+    <a class="nav-item" href="index.html"><svg viewBox="0 0 24 24">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z" />
+        <polyline points="9 22 9 12 15 12 15 22" />
+      </svg></a>
+    <a class="nav-item" href="education-map.html"><svg viewBox="0 0 24 24">
+        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2Z" />
+        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7Z" />
+      </svg></a>
+    <a class="nav-item" href="social-guilds.html"><svg viewBox="0 0 24 24">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+        <circle cx="9" cy="7" r="4" />
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+      </svg></a>
+    <a class="nav-item" href="reward.html"><svg viewBox="0 0 24 24">
+        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+        <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+      </svg><span class="notification-dot"></span></a>
+    <a class="nav-item" href="settings.html"><svg viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="3" />
+        <path
+          d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z" />
+      </svg></a>
+  </nav>
+
+  <script src="app.js"></script>
+  <script type="module">
+    import { SorobanService } from './sorobanService.js?v=3';
+
+    // Token list with metadata
+    const tokens = [
+      { code: 'ARS', name: 'T Pesos Argentinos', icon: '🇦🇷', balance: 0.00, color: '#1a1a2e' },
+      { code: 'tGLD', name: 'T Oro', icon: '💛', balance: 8.7543210, color: '#eab308' },
+      { code: 'USDT', name: 'T USDT', icon: '₮', balance: 0.00, color: '#26a17b' },
+      { code: 'Petróleo', name: 'T Petróleo', icon: '🛢️', balance: 0.00, color: '#1f2937' },
+      { code: 'Soja', name: 'T Soja', icon: '🌾', balance: 0.00, color: '#92a034' },
+      { code: 'Cobre', name: 'T Cobre', icon: '🔧', balance: 0.00, color: '#b87333' },
+      { code: 'Plata', name: 'T Plata', icon: '⚫', balance: 0.00, color: '#c0c0c0' },
+      { code: 'Maíz', name: 'T Maíz', icon: '🌽', balance: 0.00, color: '#f59e0b' }
+    ];
+
+    let selectedFromToken = tokens[1]; // Default: tGLD
+    let selectedToToken = tokens[0]; // Default: ARS
+    let openDropdown = null;
+
+    // Render token list in dropdown
+    function renderTokenDropdown(mode) {
+      const dropdown = document.getElementById(`${mode}-dropdown`);
+      const otherMode = mode === 'from' ? 'to' : 'from';
+      const selectedOtherToken = mode === 'from' ? selectedToToken : selectedFromToken;
+      
+      dropdown.innerHTML = '';
+
+      tokens.forEach(token => {
+        // Skip if token is already selected in the other direction
+        if (token.code === selectedOtherToken.code) return;
+
+        const tokenEl = document.createElement('button');
+        tokenEl.className = 'token-option';
+        tokenEl.innerHTML = `
+          <div class="token-option-icon">${token.icon}</div>
+          <div class="token-option-info">
+            <div class="token-option-code">${token.code}</div>
+            <div class="token-option-name">${token.name}</div>
+          </div>
+          <div class="token-option-balance">${token.balance.toLocaleString('es-AR', { maximumFractionDigits: 7 })}</div>
+        `;
+
+        tokenEl.addEventListener('click', () => {
+          if (mode === 'from') {
+            selectedFromToken = token;
+            document.getElementById('from-token-code').textContent = token.code;
+            document.querySelector('#from-token-btn .token-icon').textContent = token.icon;
+          } else {
+            selectedToToken = token;
+            document.getElementById('to-token-code').textContent = token.code;
+            document.querySelector('#to-token-btn .token-icon').textContent = token.icon;
+          }
+          updateBalances();
+          calculateSwap();
+          closeAllDropdowns();
+        });
+
+        dropdown.appendChild(tokenEl);
+      });
+    }
+
+    // Close all dropdowns
+    function closeAllDropdowns() {
+      document.getElementById('from-dropdown').style.display = 'none';
+      document.getElementById('to-dropdown').style.display = 'none';
+      openDropdown = null;
+    }
+
+    // Toggle dropdown
+    function toggleDropdown(mode) {
+      const dropdown = document.getElementById(`${mode}-dropdown`);
+      const isOpen = dropdown.style.display === 'flex';
+
+      closeAllDropdowns();
+
+      if (!isOpen) {
+        renderTokenDropdown(mode);
+        dropdown.style.display = 'flex';
+        openDropdown = mode;
+      }
+    }
+
+    // Update balances display
+    function updateBalances() {
+      const fromBalance = tokens.find(t => t.code === selectedFromToken.code)?.balance || 0;
+      const toBalance = tokens.find(t => t.code === selectedToToken.code)?.balance || 0;
+
+      document.getElementById('from-balance').textContent = 
+        selectedFromToken.code === 'ARS' 
+          ? `Balance: $${fromBalance.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+          : `Balance: ${fromBalance.toLocaleString('es-AR', { maximumFractionDigits: 7 })}`;
+
+      document.getElementById('to-balance').textContent =
+        selectedToToken.code === 'ARS'
+          ? `Balance: $${toBalance.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+          : `Balance: ${toBalance.toLocaleString('es-AR', { maximumFractionDigits: 7 })}`;
+    }
+
+    // Calculate swap preview
+    function calculateSwap() {
+      const fromAmount = parseFloat(document.getElementById('from-amount').value) || 0;
+      
+      // Mock exchange rates (in a real app, these would come from an oracle/API)
+      const exchangeRates = {
+        'ARS-tGLD': 0.00001,
+        'tGLD-ARS': 100000,
+        'ARS-USDT': 0.0006,
+        'USDT-ARS': 1666.67,
+      };
+
+      const key = `${selectedFromToken.code}-${selectedToToken.code}`;
+      const rate = exchangeRates[key] || 1;
+      const fee = fromAmount * 0.005; // 0.5% fee
+      const toAmount = (fromAmount - fee) * rate;
+
+      document.getElementById('to-amount').value = toAmount.toFixed(7);
+      document.getElementById('exchange-rate').textContent = `1 ${selectedFromToken.code} = ${rate.toFixed(7)} ${selectedToToken.code}`;
+      document.getElementById('exchange-fee').textContent = `${fee.toFixed(7)} ${selectedFromToken.code} (0.5%)`;
+    }
+
+    // Event listeners
+    document.getElementById('from-token-btn').addEventListener('click', () => {
+      toggleDropdown('from');
+    });
+
+    document.getElementById('to-token-btn').addEventListener('click', () => {
+      toggleDropdown('to');
+    });
+
+    document.getElementById('swap-direction-btn').addEventListener('click', () => {
+      [selectedFromToken, selectedToToken] = [selectedToToken, selectedFromToken];
+      document.getElementById('from-token-code').textContent = selectedFromToken.code;
+      document.getElementById('to-token-code').textContent = selectedToToken.code;
+      document.querySelector('#from-token-btn .token-icon').textContent = selectedFromToken.icon;
+      document.querySelector('#to-token-btn .token-icon').textContent = selectedToToken.icon;
+      document.getElementById('from-amount').value = '';
+      document.getElementById('to-amount').value = '';
+      updateBalances();
+      closeAllDropdowns();
+    });
+
+    document.getElementById('from-amount').addEventListener('input', calculateSwap);
+
+    document.getElementById('confirm-swap-btn').addEventListener('click', async () => {
+      const fromAmount = parseFloat(document.getElementById('from-amount').value);
+      if (!fromAmount || fromAmount <= 0) {
+        alert('Por favor ingresa una cantidad válida');
+        return;
+      }
+
+      closeAllDropdowns();
+      alert(`Intercambiando ${fromAmount} ${selectedFromToken.code} por ${document.getElementById('to-amount').value} ${selectedToToken.code}`);
+      document.getElementById('from-amount').value = '';
+      document.getElementById('to-amount').value = '';
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+      const fromDropdown = document.getElementById('from-dropdown');
+      const toDropdown = document.getElementById('to-dropdown');
+      const fromBtn = document.getElementById('from-token-btn');
+      const toBtn = document.getElementById('to-token-btn');
+
+      if (!fromBtn.contains(e.target) && !fromDropdown.contains(e.target)) {
+        fromDropdown.style.display = 'none';
+      }
+      if (!toBtn.contains(e.target) && !toDropdown.contains(e.target)) {
+        toDropdown.style.display = 'none';
+      }
+    });
+
+    // Initialize
+    updateBalances();
+  </script>
+</body>
+</html>

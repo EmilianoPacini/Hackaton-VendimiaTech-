@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aurum Wallet — Recibir dinero</title>
+  <meta name="description" content="Recibir dinero en tu billetera" />
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .receive-card {
+      background: var(--color-card-solid);
+      border: 1.5px solid var(--color-card-glass-border);
+      border-radius: var(--radius-md);
+      padding: 24px;
+      margin-top: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      text-align: center;
+    }
+
+    .qr-code-section {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.5);
+      border-radius: 16px;
+      margin-bottom: 10px;
+    }
+
+    .qr-code-placeholder {
+      width: 200px;
+      height: 200px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #f0f0f0, #e0e0e0);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      color: var(--color-text-secondary);
+      border: 2px dashed var(--color-card-glass-border);
+    }
+
+    .address-section {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .address-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--color-text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .address-display {
+      background: rgba(255, 255, 255, 0.5);
+      border: 1px solid var(--color-card-glass-border);
+      border-radius: 12px;
+      padding: 14px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      word-break: break-all;
+      color: var(--color-text-primary);
+      font-weight: 600;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .action-btn-small {
+      flex: 1;
+      border: 1.5px solid var(--color-card-glass-border);
+      background: rgba(255, 255, 255, 0.5);
+      border-radius: 16px;
+      padding: 12px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .action-btn-small:hover {
+      background: rgba(255, 255, 255, 0.7);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    }
+
+    .icon-text {
+      font-size: 14px;
+    }
+
+    .info-box {
+      background: rgba(59, 130, 246, 0.08);
+      border: 1px solid rgba(59, 130, 246, 0.2);
+      border-radius: 12px;
+      padding: 12px;
+      font-size: 12px;
+      color: var(--color-text-secondary);
+      line-height: 1.5;
+    }
+
+    .amount-input-section {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .amount-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--color-text-secondary);
+      text-transform: uppercase;
+    }
+
+    .amount-input-group {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .amount-input {
+      flex: 1;
+      border: 1px solid var(--color-card-glass-border);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.5);
+      color: var(--color-text-primary);
+      padding: 12px;
+      font-size: 14px;
+      outline: none;
+    }
+
+    .amount-input:focus {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.12);
+    }
+
+    .currency-tag {
+      background: var(--color-accent-green);
+      color: white;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .share-btn {
+      width: 100%;
+      background: linear-gradient(135deg, #22c55e, #10b981);
+      color: white;
+      border: none;
+      border-radius: 16px;
+      padding: 14px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 10px;
+    }
+
+    .share-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(34, 197, 94, 0.4);
+    }
+
+    .copy-feedback {
+      font-size: 12px;
+      color: var(--color-accent-green);
+      margin-top: 8px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .copy-feedback.show {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body class="page-transition">
+  <div class="screen">
+    <div class="ambient-blob blob-1"></div>
+    <div class="ambient-blob blob-2" style="background:#fef08a;"></div>
+    <div class="screen-content">
+      <div class="social-header" style="margin-top:10px;">
+        <a class="back-btn" href="index.html">
+          <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+        </a>
+        <h1>Recibir dinero</h1>
+      </div>
+
+      <div class="receive-card">
+        <!-- QR Code Section -->
+        <div>
+          <div class="address-label" style="margin-bottom: 10px;">Tu código QR</div>
+          <div class="qr-code-section">
+            <div class="qr-code-placeholder" id="qr-placeholder">
+              QR Code
+            </div>
+          </div>
+        </div>
+
+        <!-- Address Section -->
+        <div class="address-section">
+          <div class="address-label">Tu dirección Stellar</div>
+          <div class="address-display" id="address-display">
+            Conectando billetera...
+          </div>
+          <div class="action-buttons">
+            <button class="action-btn-small" id="copy-btn">
+              <span class="icon-text">📋</span> Copiar
+            </button>
+            <button class="action-btn-small" id="share-btn">
+              <span class="icon-text">↗</span> Compartir
+            </button>
+          </div>
+          <div class="copy-feedback" id="copy-feedback">✓ Dirección copiada</div>
+        </div>
+
+        <!-- Amount Section -->
+        <div class="amount-input-section">
+          <div class="amount-label">Solicitar cantidad específica (opcional)</div>
+          <div class="amount-input-group">
+            <input type="number" id="amount-input" class="amount-input" placeholder="0.00" min="0" step="0.01" />
+            <span class="currency-tag">ARS</span>
+          </div>
+        </div>
+
+        <!-- Info Box -->
+        <div class="info-box">
+          💡 Comparte tu dirección o código QR para que otros te puedan enviar dinero fácilmente. Tus fondos serán recibidos de forma segura en tu billetera.
+        </div>
+
+        <!-- Share Button -->
+        <button class="share-btn" id="main-share-btn">Compartir dirección de pago</button>
+      </div>
+    </div>
+    </div>
+  </div>
+
+
+
+  <!-- Bottom Navigation (fuera del screen para position:fixed) -->
+  <nav class="bottom-nav">
+    <a class="nav-item" href="index.html"><svg viewBox="0 0 24 24">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z" />
+        <polyline points="9 22 9 12 15 12 15 22" />
+      </svg></a>
+    <a class="nav-item" href="education-map.html"><svg viewBox="0 0 24 24">
+        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2Z" />
+        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7Z" />
+      </svg></a>
+    <a class="nav-item" href="social-guilds.html"><svg viewBox="0 0 24 24">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+        <circle cx="9" cy="7" r="4" />
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+      </svg></a>
+    <a class="nav-item" href="reward.html"><svg viewBox="0 0 24 24">
+        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+        <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+      </svg><span class="notification-dot"></span></a>
+    <a class="nav-item" href="settings.html"><svg viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="3" />
+        <path
+          d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z" />
+      </svg></a>
+  </nav>
+
+  <!-- Stellar SDK -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/stellar-sdk/12.3.0/stellar-sdk.min.js"></script>
+
+  <script type="module">
+    import { SorobanService } from './sorobanService.js?v=3';
+
+    const addressDisplay = document.getElementById('address-display');
+    const copyBtn = document.getElementById('copy-btn');
+    const shareBtn = document.getElementById('share-btn');
+    const mainShareBtn = document.getElementById('main-share-btn');
+    const amountInput = document.getElementById('amount-input');
+    const copyFeedback = document.getElementById('copy-feedback');
+    let userAddress = '';
+
+    async function initReceive() {
+      try {
+        const { address } = await SorobanService.connectWallet();
+        userAddress = address;
+        addressDisplay.textContent = address;
+      } catch (err) {
+        console.warn('Freighter no disponible:', err.message);
+        addressDisplay.textContent = 'Error al conectar billetera. Por favor, recarga la página.';
+      }
+    }
+
+    function copyToClipboard() {
+      if (!userAddress) return;
+      navigator.clipboard.writeText(userAddress).then(() => {
+        copyFeedback.classList.add('show');
+        setTimeout(() => {
+          copyFeedback.classList.remove('show');
+        }, 2000);
+      });
+    }
+
+    function sharePaymentRequest() {
+      const amount = amountInput.value;
+      let shareText = `Envíame dinero a: ${userAddress}`;
+      
+      if (amount && amount > 0) {
+        shareText = `Solicito ${amount} ARS. Envíame dinero a: ${userAddress}`;
+      }
+
+      if (navigator.share) {
+        navigator.share({
+          title: 'Aurum Wallet',
+          text: shareText
+        }).catch(err => console.log('Error al compartir:', err));
+      } else {
+        // Fallback: copiar al portapapeles
+        navigator.clipboard.writeText(shareText);
+        copyFeedback.textContent = '✓ Texto copiado';
+        copyFeedback.classList.add('show');
+        setTimeout(() => {
+          copyFeedback.classList.remove('show');
+          copyFeedback.textContent = '✓ Dirección copiada';
+        }, 2000);
+      }
+    }
+
+    copyBtn.addEventListener('click', copyToClipboard);
+    shareBtn.addEventListener('click', sharePaymentRequest);
+    mainShareBtn.addEventListener('click', sharePaymentRequest);
+
+    window.addEventListener('load', () => {
+      setTimeout(initReceive, 1500);
+    });
+  </script>
+</body>
+</html>
