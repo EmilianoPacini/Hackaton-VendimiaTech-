@@ -1,5 +1,5 @@
 /**
- * Aurum 3D Mascot Viewer
+ * Tangibl 3D Mascot Viewer
  * Renders an animated GLB model as the wallet mascot
  * Uses Three.js r162 ES modules + GLTFLoader + AnimationMixer
  */
@@ -54,7 +54,7 @@ function initMascot3D() {
   rimLight.position.set(0, -1, -3);
   scene.add(rimLight);
 
-  // Bottom green glow (matches Aurum pastel aesthetic)
+  // Bottom green glow (matches Tangibl pastel aesthetic)
   const bottomLight = new THREE.PointLight(0x86efac, 0.5, 5);
   bottomLight.position.set(0, -1.5, 0);
   scene.add(bottomLight);

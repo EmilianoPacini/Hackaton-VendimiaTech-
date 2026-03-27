@@ -5,8 +5,11 @@ import freighterApi from '@stellar/freighter-api';
 const SOROBAN_RPC_URL = 'https://soroban-testnet.stellar.org';
 const NETWORK_PASSPHRASE = 'Test SDF Network ; September 2015';
 
-// Dirección del contrato AURUM RWA en Testnet
-const AURUM_CONTRACT_ID = 'CCJUJUBPQA3S3VJ6NWGF2FLYARSPIXWLGMVRHOZDBHSKXYBQMMZZEMZ5';
+// Dirección del contrato Tangibl RWA en Testnet
+const TANGIBL_CONTRACT_ID = 'CCJUJUBPQA3S3VJ6NWGF2FLYARSPIXWLGMVRHOZDBHSKXYBQMMZZEMZ5';
+
+// Compatibilidad hacia atrás
+const AURUM_CONTRACT_ID = TANGIBL_CONTRACT_ID;
 
 /**
  * Componente React "Botón de Pagar con Oro".
@@ -50,7 +53,7 @@ export const PayWithGoldButton = ({ montoEnPesos, direccionDestino }) => {
       const account = await server.getAccount(publicKey);
 
       // 3. Preparar los tipos de datos requeridos (ScVal) para llamar a `pay_with_rwa`
-      const contract = new StellarSdk.Contract(AURUM_CONTRACT_ID);
+      const contract = new StellarSdk.Contract(TANGIBL_CONTRACT_ID);
       const senderScVal = new StellarSdk.Address(publicKey).toScVal();
       const destScVal = new StellarSdk.Address(direccionDestino).toScVal();
 

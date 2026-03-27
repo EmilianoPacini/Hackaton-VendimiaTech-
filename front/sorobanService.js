@@ -1,6 +1,6 @@
 /**
  * ============================================================================
- * AURUM - Servicio de integración con Soroban (Stellar Testnet)
+ * Tangibl - Servicio de integración con Soroban (Stellar Testnet)
  * Conecta Freighter Wallet, consulta balances y ejecuta pagos RWA on-chain.
  * ============================================================================
  */
@@ -12,7 +12,10 @@ const SOROBAN_RPC_URL = 'https://soroban-testnet.stellar.org';
 const NETWORK_PASSPHRASE = 'Test SDF Network ; September 2015';
 
 // TODO: Reemplazar con los IDs reales generados por build_and_deploy.sh
-const AURUM_CONTRACT_ID = 'CCJUJUBPQA3S3VJ6NWGF2FLYARSPIXWLGMVRHOZDBHSKXYBQMMZZEMZ5';
+const TANGIBL_CONTRACT_ID = 'CCJUJUBPQA3S3VJ6NWGF2FLYARSPIXWLGMVRHOZDBHSKXYBQMMZZEMZ5';
+
+// Compatibilidad hacia atrás
+const AURUM_CONTRACT_ID = TANGIBL_CONTRACT_ID;
 const GOLD_CONTRACT_ID = 'CD7FOEKQELTQGNVJB4J3QABGJY2JV2UONHD2QZ4PKACKYXYYU6BHCAXC';
 const ORACLE_CONTRACT_ID = 'CBMNHAXFDEDNZWQ6FWJNQNCX2L2NLZG6YX4OISMEF42GV5Y2UMF5AULT';
 
@@ -160,7 +163,7 @@ export const SorobanService = {
     const publicKey = this._publicKey;
     if (!publicKey) throw new Error('Wallet no conectada.');
 
-    const contract = new StellarSdk.Contract(AURUM_CONTRACT_ID);
+    const contract = new StellarSdk.Contract(TANGIBL_CONTRACT_ID);
 
     const tx = new StellarSdk.TransactionBuilder(
       await server.getAccount(publicKey),
@@ -318,7 +321,7 @@ export const SorobanService = {
   // ==========================================================================
 
   /**
-   * Parsea el contenido de un código QR de pago AURUM.
+   * Parsea el contenido de un código QR de pago Tangibl.
    * Formato esperado: JSON { dest: "G...", amount: 2450, name: "Comercio" }
    * @param {string} qrPayload
    * @returns {{ recipient: string, amount: number, name: string }}

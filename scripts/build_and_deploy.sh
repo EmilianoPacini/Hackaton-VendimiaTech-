@@ -1,6 +1,6 @@
 #!/bin/bash
 # ============================================================================
-# AURUM & ORACLE - Build, Optimize, Deploy, and Initialize Contracts
+# Tangibl & ORACLE - Build, Optimize, Deploy, and Initialize Contracts
 # ============================================================================
 
 set -e
@@ -18,7 +18,7 @@ CONTRACT_DIR="$PROJECT_DIR/contracts"
 KEYS_DIR="$PROJECT_DIR/.keys"
 
 echo -e "${GREEN}════════════════════════════════════════════════════════════${NC}"
-echo -e "${GREEN}  AURUM & ORACLE - Build, Deploy & Initialize${NC}"
+echo -e "${GREEN}  Tangibl & ORACLE - Build, Deploy & Initialize${NC}"
 echo -e "${GREEN}════════════════════════════════════════════════════════════${NC}"
 
 # ============================================================================
@@ -45,15 +45,15 @@ stellar contract optimize --wasm "$ORACLE_WASM"
 ORACLE_OPT_WASM="${ORACLE_WASM%.wasm}.optimized.wasm"
 echo -e "  ✅ Oracle WASM optimized"
 
-# Aurum
-AURUM_WASM="$CONTRACT_DIR/target/wasm32v1-none/release/aurum.wasm"
-if [ ! -f "$AURUM_WASM" ]; then
-    echo -e "  ${RED}❌ Aurum WASM not found${NC}"
+# Tangibl
+TANGIBL_WASM="$CONTRACT_DIR/target/wasm32v1-none/release/tangibl.wasm"
+if [ ! -f "$TANGIBL_WASM" ]; then
+    echo -e "  ${RED}❌ Tangibl WASM not found${NC}"
     exit 1
 fi
-stellar contract optimize --wasm "$AURUM_WASM"
-AURUM_OPT_WASM="${AURUM_WASM%.wasm}.optimized.wasm"
-echo -e "  ✅ Aurum WASM optimized"
+stellar contract optimize --wasm "$TANGIBL_WASM"
+TANGIBL_OPT_WASM="${TANGIBL_WASM%.wasm}.optimized.wasm"
+echo -e "  ✅ Tangibl WASM optimized"
 
 # ============================================================================
 # 3. Deploy to Testnet
@@ -65,8 +65,8 @@ if [ ! -f "$ORACLE_OPT_WASM" ]; then
     echo -e "  ${RED}❌ Oracle optimized WASM not found: $ORACLE_OPT_WASM${NC}"
     exit 1
 fi
-if [ ! -f "$AURUM_OPT_WASM" ]; then
-    echo -e "  ${RED}❌ Aurum optimized WASM not found: $AURUM_OPT_WASM${NC}"
+if [ ! -f "$TANGIBL_OPT_WASM" ]; then
+    echo -e "  ${RED}❌ Tangibl optimized WASM not found: $TANGIBL_OPT_WASM${NC}"
     exit 1
 fi
 
@@ -74,9 +74,9 @@ ORACLE_ID=$(stellar contract deploy --wasm "$ORACLE_OPT_WASM" --source-account i
 echo "$ORACLE_ID" > "$KEYS_DIR/oracle_contract_id.txt"
 echo -e "  📋 Oracle Contract ID: ${CYAN}$ORACLE_ID${NC}"
 
-AURUM_ID=$(stellar contract deploy --wasm "$AURUM_OPT_WASM" --source-account issuer --network testnet)
-echo "$AURUM_ID" > "$KEYS_DIR/aurum_contract_id.txt"
-echo -e "  📋 Aurum Contract ID: ${CYAN}$AURUM_ID${NC}"
+TANGIBL_ID=$(stellar contract deploy --wasm "$TANGIBL_OPT_WASM" --source-account issuer --network testnet)
+echo "$TANGIBL_ID" > "$KEYS_DIR/tangibl_contract_id.txt"
+echo -e "  📋 Tangibl Contract ID: ${CYAN}$TANGIBL_ID${NC}"
 
 # ============================================================================
 # 4. Initialize Oracle and Set Prices
@@ -112,19 +112,19 @@ stellar contract invoke --id "$ORACLE_ID" --source-account issuer --network test
 echo -e "  ✅ Oracle initialized with XAU=\$2000 and USD=\$1000 ARS"
 
 # ============================================================================
-# 5. Initialize AURUM
+# 5. Initialize Tangibl
 # ============================================================================
 
-echo -e "\n${YELLOW}[5/5] Initializing AURUM contract...${NC}"
+echo -e "\n${YELLOW}[5/5] Initializing Tangibl contract...${NC}"
 GOLD_CONTRACT_ID=$(cat "$KEYS_DIR/gold_contract_id.txt")
 
-stellar contract invoke --id "$AURUM_ID" --source-account issuer --network testnet \
+stellar contract invoke --id "$TANGIBL_ID" --source-account issuer --network testnet \
     -- initialize \
     --admin "$ISSUER_ADDR" \
     --gold_token "$GOLD_CONTRACT_ID" \
     --oracle_address "$ORACLE_ID"
 
-echo -e "  ✅ Aurum initialized with Oracle integration!"
+echo -e "  ✅ Tangibl initialized with Oracle integration!"
 
 # ============================================================================
 # Summary
@@ -135,6 +135,6 @@ echo -e "${GREEN}  ✅ Deployment Complete!${NC}"
 echo -e "${GREEN}════════════════════════════════════════════════════════════${NC}"
 echo -e ""
 echo -e "  ${CYAN}Oracle Contract:${NC} $ORACLE_ID"
-echo -e "  ${CYAN}AURUM Contract:${NC}  $AURUM_ID"
+echo -e "  ${CYAN}Tangibl Contract:${NC}  $TANGIBL_ID"
 echo -e "  ${CYAN}GOLD Token SAC:${NC}  $GOLD_CONTRACT_ID"
 echo -e ""

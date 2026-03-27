@@ -1,6 +1,6 @@
 [workspace]
 members = [
-    "aurum",
+    "tangibl",
     "oracle"
 ]
 resolver = "2"

@@ -21,8 +21,8 @@ app.use('/auth', auth_1.default);
 // Protocolo SEP-24 (Ancla Interactiva)
 app.use('/', anchor_1.default);
 app.get('/health', (req, res) => {
-    res.json({ status: 'ok', service: 'Aurum Anchor' });
+    res.json({ status: 'ok', service: 'Tangibl Anchor' });
 });
 app.listen(PORT, () => {
-    console.log(`[Aurum Anchor] Backend corriendo en http://localhost:${PORT}`);
+    console.log(`[Tangibl Anchor] Backend corriendo en http://localhost:${PORT}`);
 });

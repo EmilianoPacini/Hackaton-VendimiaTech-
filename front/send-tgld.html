@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Aurum Wallet — Enviar tGLD</title>
+  <title>Tangibl Wallet — Enviar tGLD</title>
   <meta name="description" content="Send tGLD with Freighter" />
   <link rel="stylesheet" href="styles.css" />
   <style>
@@ -195,10 +195,10 @@
       const name = 'Transferencia tGLD';
       
       // Guardar en sessionStorage para evitar perdida de query strings por redireccion del server (clean URLs)
-      sessionStorage.setItem('aurum_tx_dest', destination);
-      sessionStorage.setItem('aurum_tx_amount', arsForUrl);
-      sessionStorage.setItem('aurum_tx_name', name);
-      sessionStorage.setItem('aurum_tx_max_gold', rawGold.toString());
+      sessionStorage.setItem('tangibl_tx_dest', destination);
+      sessionStorage.setItem('tangibl_tx_amount', arsForUrl);
+      sessionStorage.setItem('tangibl_tx_name', name);
+      sessionStorage.setItem('tangibl_tx_max_gold', rawGold.toString());
 
       const nextUrl = `confirm-tx.html?v=${Date.now()}&dest=${encodeURIComponent(destination)}&amount=${encodeURIComponent(arsForUrl)}&name=${encodeURIComponent(name)}&max_gold=${rawGold.toString()}`;
       window.location.href = nextUrl;

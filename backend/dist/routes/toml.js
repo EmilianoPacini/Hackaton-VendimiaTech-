@@ -12,7 +12,7 @@ router.get('/stellar.toml', (req, res) => {
     // TODO: Para producción, cambiar localhost por el dominio real
     const domain = `http://localhost:${port}`;
     const toml = `
-# AURUM Anchor Info
+# Tangibl Anchor Info
 ACCOUNTS=["${process.env.SERVER_PUBLIC_KEY || ''}"]
 NETWORK_PASSPHRASE="${process.env.NETWORK_PASSPHRASE || 'Test SDF Network ; September 2015'}"
 

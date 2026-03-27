@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Aurum Wallet — Confirmar Pago</title>
-  <meta name="description" content="Aurum Wallet Confirm TX" />
+  <title>Tangibl Wallet — Confirmar Pago</title>
+  <meta name="description" content="Tangibl Wallet Confirm TX" />
   <link rel="stylesheet" href="styles.css" />
   <style>
     /* Estilos Confirm TX */
@@ -152,10 +152,10 @@
 
     // Leer parámetros de la URL
     const params = new URLSearchParams(window.location.search);
-    const dest = params.get('dest') || sessionStorage.getItem('aurum_tx_dest') || '';
-    const amount = params.get('amount') || sessionStorage.getItem('aurum_tx_amount') || '2450';
-    const maxGoldFromUrl = params.get('max_gold') || sessionStorage.getItem('aurum_tx_max_gold') || '';
-    const name = params.get('name') || sessionStorage.getItem('aurum_tx_name') || 'Comercio';
+    const dest = params.get('dest') || sessionStorage.getItem('tangibl_tx_dest') || '';
+    const amount = params.get('amount') || sessionStorage.getItem('tangibl_tx_amount') || '2450';
+    const maxGoldFromUrl = params.get('max_gold') || sessionStorage.getItem('tangibl_tx_max_gold') || '';
+    const name = params.get('name') || sessionStorage.getItem('tangibl_tx_name') || 'Comercio';
 
     // Poblar la tarjeta de confirmación con datos reales
     const nameEl = document.querySelector('.tx-recipient-name');

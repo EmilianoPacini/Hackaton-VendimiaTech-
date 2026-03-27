@@ -70,15 +70,15 @@ const MAX_PRICE_AGE_SECS: u64 = 86400; // 24 hours (Stale Price tolerance)
 // ============================================================================
 
 #[contract]
-pub struct AurumContract;
+pub struct TangiblContract;
 
 #[contractimpl]
-impl AurumContract {
+impl TangiblContract {
     // ========================================================================
     // Initialization
     // ========================================================================
 
-    /// Initialize the AURUM payment contract.
+    /// Initialize the Tangibl payment contract.
     ///
     /// - `admin`: The administrator address.
     /// - `gold_token`: The contract address of the GOLD token (SAC).

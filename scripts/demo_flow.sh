@@ -1,6 +1,6 @@
 #!/bin/bash
 # ============================================================================
-# AURUM - Complete Demo Flow
+# Tangibl - Complete Demo Flow
 # Unified script for the 3-minute hackathon pitch demo
 # ============================================================================
 
@@ -22,7 +22,7 @@ KEYS_DIR="$PROJECT_DIR/.keys"
 # Load addresses
 source "$KEYS_DIR/addresses.env"
 GOLD_CONTRACT_ID=$(cat "$KEYS_DIR/gold_contract_id.txt")
-AURUM_CONTRACT_ID=$(cat "$KEYS_DIR/aurum_contract_id.txt")
+TANGIBL_CONTRACT_ID=$(cat "$KEYS_DIR/tangibl_contract_id.txt")
 ORACLE_CONTRACT_ID=$(cat "$KEYS_DIR/oracle_contract_id.txt")
 
 clear
@@ -30,12 +30,12 @@ clear
 echo -e "${BOLD}${GREEN}"
 echo -e "╔══════════════════════════════════════════════════════════════╗"
 echo -e "║                                                              ║"
-echo -e "║          ⭐  AURUM - Gold-Backed Digital Payments  ⭐        ║"
+echo -e "║          ⭐  Tangibl - Gold-Backed Digital Payments  ⭐       ║"
 echo -e "║              Real World Asset Tokenization on Stellar        ║"
 echo -e "║                                                              ║"
 echo -e "╚══════════════════════════════════════════════════════════════╝${NC}"
 echo -e ""
-echo -e "  ${CYAN}Smart Contract:${NC} $AURUM_CONTRACT_ID"
+echo -e "  ${CYAN}Smart Contract:${NC} $TANGIBL_CONTRACT_ID"
 echo -e "  ${CYAN}GOLD Token:${NC}     $GOLD_CONTRACT_ID"
 echo -e "  ${CYAN}Network:${NC}        Stellar Testnet"
 
@@ -84,7 +84,7 @@ USD_ARS=$(stellar contract invoke \
 
 echo -e "  📈 XAU -> USD: ${MAGENTA}$XAU_USD${NC}"
 echo -e "  📈 USD -> ARS: ${MAGENTA}$USD_ARS${NC}"
-echo -e "  📈 Cross rate used automatically by Aurum for checkout"
+echo -e "  📈 Cross rate used automatically by Tangibl for checkout"
 
 # Done fetching prices
 
@@ -139,7 +139,7 @@ for PAYMENT in "${PAYMENTS[@]}"; do
 
     # Preview
     GOLD_PREVIEW=$(stellar contract invoke \
-        --id "$AURUM_CONTRACT_ID" \
+        --id "$TANGIBL_CONTRACT_ID" \
         --network testnet \
         --source-account user1 \
         -- \
@@ -153,7 +153,7 @@ for PAYMENT in "${PAYMENTS[@]}"; do
 
     # Execute payment
     GOLD_USED=$(stellar contract invoke \
-        --id "$AURUM_CONTRACT_ID" \
+        --id "$TANGIBL_CONTRACT_ID" \
         --network testnet \
         --source-account user1 \
         -- \
@@ -206,8 +206,8 @@ echo -e "  └────────────┴─────────
 
 echo -e "\n${BOLD}${YELLOW}━━━ SCENE 5: 🔗 On-Chain Verification ━━━${NC}"
 echo -e ""
-echo -e "  ${CYAN}AURUM Contract:${NC}"
-echo -e "  https://stellar.expert/explorer/testnet/contract/$AURUM_CONTRACT_ID"
+echo -e "  ${CYAN}Tangibl Contract:${NC}"
+echo -e "  https://stellar.expert/explorer/testnet/contract/$TANGIBL_CONTRACT_ID"
 echo -e ""
 echo -e "  ${CYAN}GOLD Asset:${NC}"
 echo -e "  https://stellar.expert/explorer/testnet/asset/GOLD-$ISSUER_ADDR"

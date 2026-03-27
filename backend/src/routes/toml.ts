@@ -11,7 +11,7 @@ router.get('/stellar.toml', (req, res) => {
   const domain = `http://localhost:${port}`;
   
   const toml = `
-# AURUM Anchor Info
+# Tangibl Anchor Info
 ACCOUNTS=["${process.env.SERVER_PUBLIC_KEY || ''}"]
 NETWORK_PASSPHRASE="${process.env.NETWORK_PASSPHRASE || 'Test SDF Network ; September 2015'}"
 

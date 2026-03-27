@@ -1,6 +1,6 @@
 #!/bin/bash
 # ============================================================================
-# AURUM - Setup Environment Script
+# Tangibl - Setup Environment Script
 # Installs Rust, wasm32 target, and stellar-cli
 # ============================================================================
 
@@ -12,7 +12,7 @@ RED='\033[0;31m'
 NC='\033[0m'
 
 echo -e "${GREEN}════════════════════════════════════════════════════════════${NC}"
-echo -e "${GREEN}  AURUM - RWA Gold Tokenization - Environment Setup${NC}"
+echo -e "${GREEN}  Tangibl - RWA Gold Tokenization - Environment Setup${NC}"
 echo -e "${GREEN}════════════════════════════════════════════════════════════${NC}"
 
 # 1. Check/Install Rust

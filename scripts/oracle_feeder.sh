@@ -1,8 +1,8 @@
 #!/bin/bash
 # ============================================================================
-# AURUM - Oracle Feeder
+# Tangibl - Oracle Feeder
 # Fetches real gold price from gold-api.com, converts to ARS, and updates
-# the AURUM smart contract oracle on Stellar Testnet.
+# the Tangibl smart contract oracle on Stellar Testnet.
 #
 # This script implements the SAME PATTERN used by production oracles like
 # Chainlink, Band Protocol, and Lightecho: an off-chain feeder that brings
@@ -130,7 +130,7 @@ fetch_usd_ars_rate() {
 }
 
 update_oracle() {
-    echo -e "${BOLD}${YELLOW}━━━ AURUM Oracle Feeder ━━━${NC}"
+    echo -e "${BOLD}${YELLOW}━━━ Tangibl Oracle Feeder ━━━${NC}"
     echo -e "  ⏰ $(date '+%Y-%m-%d %H:%M:%S')"
     echo ""
 
@@ -228,7 +228,7 @@ update_oracle() {
 
 echo -e "${BOLD}${GREEN}"
 echo -e "╔══════════════════════════════════════════════════════════════╗"
-echo -e "║  🔮 AURUM Oracle Feeder - Real Gold Prices on Blockchain   ║"
+echo -e "║  🔮 Tangibl Oracle Feeder - Real Gold Prices on Blockchain   ║"
 echo -e "╚══════════════════════════════════════════════════════════════╝${NC}"
 echo ""
 

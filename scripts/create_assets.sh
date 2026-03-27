@@ -1,6 +1,6 @@
 #!/bin/bash
 # ============================================================================
-# AURUM - Create Stellar Assets and Accounts
+# Tangibl - Create Stellar Assets and Accounts
 # Creates issuer, distributor, and user accounts. Emits GOLD token on testnet.
 # ============================================================================
 
@@ -19,7 +19,7 @@ KEYS_DIR="$PROJECT_DIR/.keys"
 mkdir -p "$KEYS_DIR"
 
 echo -e "${GREEN}════════════════════════════════════════════════════════════${NC}"
-echo -e "${GREEN}  AURUM - Create Stellar Assets & Accounts${NC}"
+echo -e "${GREEN}  Tangibl - Create Stellar Assets & Accounts${NC}"
 echo -e "${GREEN}════════════════════════════════════════════════════════════${NC}"
 
 # ============================================================================
@@ -65,7 +65,7 @@ USER2_ADDR=$(stellar keys address user2)
 MERCHANT_ADDR=$(stellar keys address merchant)
 
 cat > "$KEYS_DIR/addresses.env" << EOF
-# AURUM Testnet Addresses - Generated $(date -Iseconds)
+# Tangibl Testnet Addresses - Generated $(date -Iseconds)
 ISSUER_ADDR=$ISSUER_ADDR
 DISTRIBUTOR_ADDR=$DISTRIBUTOR_ADDR
 USER1_ADDR=$USER1_ADDR

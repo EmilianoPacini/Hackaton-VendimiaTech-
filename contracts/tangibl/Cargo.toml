@@ -1,6 +1,6 @@
 [package]
-name = "aurum"
-description = "AURUM - RWA Gold Tokenization Payment Contract for Stellar/Soroban"
+name = "tangibl"
+description = "Tangibl - RWA Gold Tokenization Payment Contract for Stellar/Soroban"
 version = "0.1.0"
 edition = "2021"
 rust-version = "1.89.0"

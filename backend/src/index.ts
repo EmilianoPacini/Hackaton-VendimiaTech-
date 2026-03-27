@@ -23,9 +23,9 @@ app.use('/auth', authRouter);
 app.use('/', anchorRouter);
 
 app.get('/health', (req, res) => {
-  res.json({ status: 'ok', service: 'Aurum Anchor' });
+  res.json({ status: 'ok', service: 'Tangibl Anchor' });
 });
 
 app.listen(PORT, () => {
-  console.log(`[Aurum Anchor] Backend corriendo en http://localhost:${PORT}`);
+  console.log(`[Tangibl Anchor] Backend corriendo en http://localhost:${PORT}`);
 });

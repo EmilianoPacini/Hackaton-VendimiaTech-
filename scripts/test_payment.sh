@@ -1,6 +1,6 @@
 #!/bin/bash
 # ============================================================================
-# AURUM - Test Payment Flow
+# Tangibl - Test Payment Flow
 # Simulates a complete RWA payment: QR scan → calculate → pay → verify
 # ============================================================================
 
@@ -21,10 +21,10 @@ KEYS_DIR="$PROJECT_DIR/.keys"
 # Load addresses
 source "$KEYS_DIR/addresses.env"
 GOLD_CONTRACT_ID=$(cat "$KEYS_DIR/gold_contract_id.txt")
-AURUM_CONTRACT_ID=$(cat "$KEYS_DIR/aurum_contract_id.txt")
+TANGIBL_CONTRACT_ID=$(cat "$KEYS_DIR/tangibl_contract_id.txt")
 
 echo -e "${GREEN}════════════════════════════════════════════════════════════${NC}"
-echo -e "${GREEN}  AURUM - Test RWA Payment Flow${NC}"
+echo -e "${GREEN}  Tangibl - Test RWA Payment Flow${NC}"
 echo -e "${GREEN}════════════════════════════════════════════════════════════${NC}"
 
 # ============================================================================
@@ -70,7 +70,7 @@ echo -e "  📋 QR Data: {\"dest\": \"$MERCHANT_ADDR\", \"monto_fiat\": $FIAT_DI
 echo -e "\n${YELLOW}[3/5] 🔍 Payment preview (how much GOLD needed)...${NC}"
 
 GOLD_PREVIEW=$(stellar contract invoke \
-    --id "$AURUM_CONTRACT_ID" \
+    --id "$TANGIBL_CONTRACT_ID" \
     --network testnet \
     --source-account user1 \
     -- \
@@ -90,7 +90,7 @@ MAX_GOLD=$(echo "$GOLD_PREVIEW * 1.01 / 1" | bc)
 echo -e "  🛡️  Slippage max spend (+1%): ${CYAN}$MAX_GOLD${NC}"
 
 GOLD_USED=$(stellar contract invoke \
-    --id "$AURUM_CONTRACT_ID" \
+    --id "$TANGIBL_CONTRACT_ID" \
     --network testnet \
     --source-account user1 \
     -- \
@@ -147,6 +147,6 @@ echo -e ""
 echo -e "  Payment: ${MAGENTA}$FIAT_DISPLAY${NC} paid with ${MAGENTA}$GOLD_USED${NC} GOLD"
 echo -e ""
 echo -e "  🔍 Verify on Stellar Expert:"
-echo -e "  ${CYAN}https://stellar.expert/explorer/testnet/contract/$AURUM_CONTRACT_ID${NC}"
+echo -e "  ${CYAN}https://stellar.expert/explorer/testnet/contract/$TANGIBL_CONTRACT_ID${NC}"
 echo -e "  ${CYAN}https://stellar.expert/explorer/testnet/account/$USER1_ADDR${NC}"
 echo -e ""

@@ -1,6 +1,6 @@
 #!/bin/bash
 # ============================================================================
-# AURUM — Generador de Bindings TypeScript para Soroban
+# Tangibl — Generador de Bindings TypeScript para Soroban
 # Lee los Contract IDs desde .keys/ y genera paquetes NPM type-safe.
 # ============================================================================
 
@@ -18,7 +18,7 @@ KEYS_DIR="$PROJECT_DIR/.keys"
 BINDINGS_DIR="$PROJECT_DIR/front/bindings"
 
 echo -e "${GREEN}════════════════════════════════════════════════════════════${NC}"
-echo -e "${GREEN}  AURUM — TypeScript Bindings Generator${NC}"
+echo -e "${GREEN}  Tangibl — TypeScript Bindings Generator${NC}"
 echo -e "${GREEN}════════════════════════════════════════════════════════════${NC}"
 
 # ============================================================================
@@ -35,25 +35,25 @@ echo -e "  🔧 stellar CLI: $(stellar --version | head -1)"
 # ============================================================================
 # Leer Contract IDs
 # ============================================================================
-AURUM_ID=$(cat "$KEYS_DIR/aurum_contract_id.txt" | tr -d '[:space:]')
-ORACLE_ID=$(cat "$KEYS_DIR/oracle_contract_id.txt" | tr -d '[:space:]')
+TANGIBL_ID=$(cat "$KEYS_DIR/tangibl_contract_id.txt" | tr -d '[:space:]')
+ORAC LE_ID=$(cat "$KEYS_DIR/oracle_contract_id.txt" | tr -d '[:space:]')
 GOLD_ID=$(cat "$KEYS_DIR/gold_contract_id.txt" | tr -d '[:space:]')
 
 echo -e "\n${YELLOW}Contract IDs:${NC}"
-echo -e "  Aurum:      ${CYAN}$AURUM_ID${NC}"
+echo -e "  Tangibl:    ${CYAN}$TANGIBL_ID${NC}"
 echo -e "  Oracle:     ${CYAN}$ORACLE_ID${NC}"
 echo -e "  GOLD Token: ${CYAN}$GOLD_ID${NC}"
 
 # ============================================================================
-# 1. Generar bindings para AURUM
+# 1. Generar bindings para Tangibl
 # ============================================================================
-echo -e "\n${YELLOW}[1/3] Generando bindings para AURUM...${NC}"
+echo -e "\n${YELLOW}[1/3] Generando bindings para Tangibl...${NC}"
 stellar contract bindings typescript \
-    --contract-id "$AURUM_ID" \
+    --contract-id "$TANGIBL_ID" \
     --network testnet \
-    --output-dir "$BINDINGS_DIR/aurum" \
+    --output-dir "$BINDINGS_DIR/tangibl" \
     --overwrite
-echo -e "  ✅ Aurum bindings generados"
+echo -e "  ✅ Tangibl bindings generados"
 
 # ============================================================================
 # 2. Generar bindings para Oracle
@@ -85,7 +85,7 @@ echo -e "${GREEN}  ✅ Bindings generados exitosamente!${NC}"
 echo -e "${GREEN}════════════════════════════════════════════════════════════${NC}"
 echo -e ""
 echo -e "  📁 Output: ${CYAN}$BINDINGS_DIR/${NC}"
-echo -e "     ├── aurum/       (Contrato de pagos RWA)"
+echo -e "     ├── tangibl/       (Contrato de pagos RWA)"
 echo -e "     ├── oracle/      (Oráculo SEP-40)"
 echo -e "     └── gold-token/  (Token GOLD SAC)"
 echo -e ""

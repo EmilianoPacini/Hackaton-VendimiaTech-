@@ -50,7 +50,7 @@ export interface Client {
 
   /**
    * Construct and simulate a initialize transaction. Returns an `AssembledTransaction` object which will have a `result` field containing the result of the simulation. If this transaction changes contract state, you will need to call `signAndSend()` on the returned object.
-   * Initialize the AURUM payment contract.
+   * Initialize the Tangibl payment contract.
    * 
    * - `admin`: The administrator address.
    * - `gold_token`: The contract address of the GOLD token (SAC).

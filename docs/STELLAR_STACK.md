@@ -1,6 +1,6 @@
-# AURUM — Integración con Stellar Stack
+# Tangibl — Integración con Stellar Stack
 
-Documentación técnica de cómo AURUM integra y/o utilizaría cada componente del ecosistema Stellar.
+Documentación técnica de cómo Tangibl integra y/o utilizaría cada componente del ecosistema Stellar.
 
 ## Resumen de Integración
 
@@ -23,7 +23,7 @@ Documentación técnica de cómo AURUM integra y/o utilizaría cada componente d
 
 **¿Qué es?** CAP-46 introdujo la capa de contratos inteligentes Turing-completos sobre Stellar, llamada Soroban.
 
-**Cómo lo usamos:** El contrato `AurumContract` está escrito en Rust (`no_std`), compilado a WebAssembly (WASM), y desplegado en Stellar Testnet. Implementa:
+**Cómo lo usamos:** El contrato `TangiblContract` está escrito en Rust (`no_std`), compilado a WebAssembly (WASM), y desplegado en Stellar Testnet. Implementa:
 - Conversión fiat→oro en tiempo real
 - Transferencias atómicas de tokens RWA
 - Gestión de oráculo con eventos on-chain
@@ -48,7 +48,7 @@ pub fn pay_with_rwa(env: Env, sender: Address, destination: Address, amount_fiat
 **Cómo lo usamos:**
 1. Emitimos el token `GOLD` como activo clásico de Stellar (`GOLD:ISSUER_ADDRESS`)
 2. Lo "wrapeamos" como SAC con `stellar contract asset deploy`
-3. El contrato AURUM interactúa con el GOLD via `token::TokenClient`, llamando `transfer()`, `balance()`, etc.
+3. El contrato Tangibl interactúa con el GOLD via `token::TokenClient`, llamando `transfer()`, `balance()`, etc.
 
 ```bash
 # Wrapping GOLD como SAC
@@ -66,7 +66,7 @@ stellar contract asset deploy \
 
 ```
 ┌──────────────────┐     ┌─────────────┐     ┌──────────────────┐
-│  gold-api.com    │────▸│ Oracle      │────▸│ AURUM Contract   │
+│  gold-api.com    │────▸│ Oracle      │────▸│ Tangibl Contract   │
 │  (precio XAU/USD)│     │ Feeder.sh   │     │ set_oracle_price │
 ├──────────────────┤     │             │     │                  │
 │  dolarapi.com    │────▸│ Calcula     │     │ Guarda precio +  │
@@ -75,7 +75,7 @@ stellar contract asset deploy \
                                               └──────────────────┘
 ```
 
-**Oráculo Lightecho (futuro):** Para producción, AURUM podría integrar directamente el contrato Lightecho Oracle desplegado en mainnet (`CDOR3QD27WAAF4TK4MO33TGQXR6RPNANNVLOY277W2XVV6ZVJ6X6X42T`) via cross-contract calls, eliminando la necesidad de un feeder propio.
+**Oráculo Lightecho (futuro):** Para producción, Tangibl podría integrar directamente el contrato Lightecho Oracle desplegado en mainnet (`CDOR3QD27WAAF4TK4MO33TGQXR6RPNANNVLOY277W2XVV6ZVJ6X6X42T`) via cross-contract calls, eliminando la necesidad de un feeder propio.
 
 ### 4. Stellar CLI & SDK
 
@@ -94,11 +94,11 @@ stellar contract asset deploy \
 
 **¿Qué es?** Un estándar para autenticar usuarios verificando que poseen una cuenta Stellar específica, sin revelar su clave secreta.
 
-**Cómo lo usaríamos en AURUM:**
+**Cómo lo usaríamos en Tangibl:**
 
 ```
 ┌──────────┐    1. Request challenge     ┌──────────────┐
-│  Wallet  │ ──────────────────────────▸ │  AURUM       │
+│  Wallet  │ ──────────────────────────▸ │  Tangibl       │
 │  (User)  │                              │  Backend     │
 │          │ ◂────────────────────────── │              │
 │          │    2. Challenge TX           │              │
@@ -111,7 +111,7 @@ stellar contract asset deploy \
 └──────────┘                              └──────────────┘
 ```
 
-El backend AURUM generaría un "challenge" (una transacción especial de Stellar). El usuario la firma con su wallet (Freighter) demostrando que posee la cuenta. El backend verifica la firma y le da un JWT para sesiones autenticadas. Esto permite:
+El backend Tangibl generaría un "challenge" (una transacción especial de Stellar). El usuario la firma con su wallet (Freighter) demostrando que posee la cuenta. El backend verifica la firma y le da un JWT para sesiones autenticadas. Esto permite:
 - Verificar identidad sin custodiar claves privadas
 - Proteger endpoints como `set_oracle_price` (solo admin)
 - Habilitar un dashboard personalizado por usuario
@@ -120,7 +120,7 @@ El backend AURUM generaría un "challenge" (una transacción especial de Stellar
 
 **¿Qué es?** Define cómo un "ancla" (anchor) — una entidad que mantiene activos del mundo real — facilita el depósito y retiro de esos activos en/desde la blockchain.
 
-**Cómo lo usaríamos en AURUM:**
+**Cómo lo usaríamos en Tangibl:**
 
 Un **ancla de oro** sería la entidad que mantiene oro físico en bóvedas certificadas. El flujo sería:
 
@@ -131,14 +131,14 @@ Un **ancla de oro** sería la entidad que mantiene oro físico en bóvedas certi
 
 ```
 ┌──────────────┐     SEP-24      ┌──────────────────┐     Custodia     ┌──────────┐
-│  App AURUM   │ ──────────────▸ │  Ancla de Oro    │ ───────────────▸ │ Bóveda   │
+│  App Tangibl   │ ──────────────▸ │  Ancla de Oro    │ ───────────────▸ │ Bóveda   │
 │  (wallet)    │  Deposit ARS   │  (Ej: Agrotoken, │  Compra/Vende   │ de Oro   │
 │              │ ◂────────────── │   Ripio, etc.)   │  oro físico     │ Físico   │
 │              │  Recibe GOLD   │                  │                 │          │
 └──────────────┘                 └──────────────────┘                 └──────────┘
 ```
 
-> **Nota para el jurado:** En Argentina, empresas como Agrotoken ya tokenizan commodities agrícolas en Stellar. AURUM aplicaría el mismo modelo pero para oro, con la ventaja de que el oro tiene un mercado global más líquido.
+> **Nota para el jurado:** En Argentina, empresas como Agrotoken ya tokenizan commodities agrícolas en Stellar. Tangibl aplicaría el mismo modelo pero para oro, con la ventaja de que el oro tiene un mercado global más líquido.
 
 ### 7. SEP-31: Cross-Border Payments
 
@@ -178,7 +178,7 @@ const signedTx = await freighterApi.signTransaction(
 const result = await server.submitTransaction(signedTx);
 ```
 
-En la versión con frontend web, el usuario abriría la app AURUM, escanearía un QR del comercio, vería cuánto GOLD necesita, y Freighter le pediría confirmación para firmar la transacción — exactamente como funciona MetaMask en Ethereum, pero con fees 1000x más baratos.
+En la versión con frontend web, el usuario abriría la app Tangibl, escanearía un QR del comercio, vería cuánto GOLD necesita, y Freighter le pediría confirmación para firmar la transacción — exactamente como funciona MetaMask en Ethereum, pero con fees 1000x más baratos.
 
 ---
 
